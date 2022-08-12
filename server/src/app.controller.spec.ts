@@ -23,12 +23,4 @@ describe('AppController', () => {
       expect(appController.getHello()).toBe(result);
     });
   });
-
-  describe('test', () => {
-    
-      it(`should return test`, () => {
-      const result = 'test';
-      expect(appController.getTest()).toBe(result);
-    });
-  });
 });

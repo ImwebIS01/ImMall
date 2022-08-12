@@ -1,26 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    private readonly databaseService: DatabaseService
+  ){}
+  
+  async create(createUserDto: CreateUserDto) {
+
+    try {
+      const { username, email, password }: CreateUserDto = createUserDto;
+      const newUser = await this.databaseService.getConnection().query(`
+      INSERT INTO test.user 
+      (username, email, password) 
+      VALUES ("${username}","${email}","${password}");
+      `);
+      return newUser;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    return this.databaseService.getConnection().query(`
+    SELECT * FROM test.user ORDER BY create_time DESC;
+
+    `)
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     return `This action removes a #${id} user`;
   }
 }
