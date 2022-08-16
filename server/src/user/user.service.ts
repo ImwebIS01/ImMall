@@ -26,13 +26,14 @@ export class UserService {
 
   async findAll() {
     return this.databaseService.getConnection().query(`
-    SELECT * FROM test.user ORDER BY create_time DESC;
-
+    SELECT * FROM user ORDER BY create_time DESC;
     `)
   }
 
   async findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.databaseService.getConnection().query(`
+    SELECT * FROM user WHERE id = ${id} ORDER BY create_time DESC;
+    `)
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
