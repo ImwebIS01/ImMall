@@ -1,52 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { UserRepository } from './user.repository';
+import * as bcrypt from 'bcryptjs';
+import { AuthCredentialDto } from './dto/auth-credential.dto';
+import { JwtService } from '@nestjs/jwt';
 
 // input-output dto 모두 있어야 함
 
-@Injectable()
 export class UserService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly userRepository: UserRepository
+  ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async register(createUserDto: CreateUserDto): Promise<Boolean> {
     try {
-      const { username, email, password }: CreateUserDto = createUserDto;
-      const newUser = await this.databaseService.getConnection().query(`
-      INSERT INTO user 
-      (username, email, password) 
-      VALUES ("${username}","${email}","${password}");
-      `);
-      return newUser;
+      await this.userRepository.create(createUserDto);
+      return true;
     } catch (error) {
       throw error;
     }
   }
 
-  async findAll() {
+  async getAll(): Promise<any> {
     try {
-    } catch (error) {}
-    const users = await this.databaseService.getConnection().query(`
-    SELECT * FROM user ORDER BY created_time DESC;
-    `);
-    return users[0];
-  }
-
-  async findOne(id: number) {
-    try {
-      const user = await this.databaseService.getConnection().query(`
-      SELECT * 
-      FROM user 
-      WHERE id = ${id};`);
-      return user[0][0];
+      return this.userRepository.findAll();
     } catch (error) {
       throw error;
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async getOne(id: number): Promise<User> {
     try {
-      const user = await this.findOne(id);
+      return this.userRepository.findOne(id);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async setOne(id: number, updateUserDto: UpdateUserDto) {
+    try {
+      const user: User = await this.userRepository.findOne(id);
       const username = updateUserDto.username
         ? updateUserDto.username
         : user.username;
@@ -55,16 +57,8 @@ export class UserService {
         ? updateUserDto.password
         : user.password;
 
-      await this.databaseService.getConnection().query(`
-      UPDATE user
-      SET
-      username='${username}',
-      email='${email}',
-      password='${password}'
-
-      WHERE id=${id};
-      `);
-      return this.findOne(id);
+      const newUser: User = new User(id, username, email, password);
+      await this.userRepository.update(newUser);
     } catch (error) {
       throw error;
     }
@@ -72,10 +66,7 @@ export class UserService {
 
   async remove(id: number) {
     try {
-      return await this.databaseService.getConnection().query(`
-      DELETE from user
-      WHERE id=${id}
-      `);
+      this.userRepository.remove(id);
     } catch (error) {
       throw error;
     }
