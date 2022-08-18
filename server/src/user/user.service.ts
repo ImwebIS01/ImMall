@@ -18,54 +18,66 @@ export class UserService {
     private readonly userRepository: UserRepository
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<Boolean> {
+  async register(createUserDto: CreateUserDto): Promise<User> {
     try {
-      await this.userRepository.create(createUserDto);
-      return true;
+      return this.userRepository.create(createUserDto);
     } catch (error) {
       throw error;
     }
   }
 
-  async getAll(): Promise<any> {
+  async getAll(): Promise<User[]> {
     try {
-      const data = await this.userRepository.findAll();
-      const user = data[0];
-      return user;
+      return await this.userRepository.findAll();
     } catch (error) {
       throw error;
     }
   }
 
-  async getOne(id: number): Promise<User> {
+  async getOne(idx: number): Promise<User> {
     try {
-      return this.userRepository.findOne(id);
+      return this.userRepository.findOne(idx);
     } catch (error) {
       throw error;
     }
   }
 
-  async setOne(id: number, updateUserDto: UpdateUserDto) {
+  async getOneByCode(code: string): Promise<User> {
     try {
-      const user: User = await this.userRepository.findOne(id);
-      const username = updateUserDto.username
-        ? updateUserDto.username
-        : user.username;
+      return this.userRepository.findOneByCode(code);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getOneByEmail(email: string): Promise<User> {
+    try {
+      return this.userRepository.findOneByEmail(email);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async setOne(idx: number, updateUserDto: UpdateUserDto): Promise<User> {
+    try {
+      const user: User = await this.userRepository.findOne(idx);
+      const name = updateUserDto.name ? updateUserDto.name : user.name;
       const email = updateUserDto.email ? updateUserDto.email : user.email;
-      const password = updateUserDto.password
-        ? updateUserDto.password
-        : user.password;
+      const passwd = updateUserDto.passwd ? updateUserDto.passwd : user.passwd;
+      const callNum = updateUserDto.callNum
+        ? updateUserDto.callNum
+        : user.callNum;
 
-      const newUser: User = new User(id, username, email, password);
-      return this.userRepository.update(newUser);
+      const updatedUser: User = new User(idx, name, email, passwd, callNum);
+      return this.userRepository.update(updatedUser);
     } catch (error) {
       throw error;
     }
   }
 
-  async remove(id: number) {
+  async remove(idx: number): Promise<User> {
     try {
-      this.userRepository.remove(id);
+      return await this.userRepository.remove(idx);
     } catch (error) {
       throw error;
     }

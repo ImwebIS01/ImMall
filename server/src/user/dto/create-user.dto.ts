@@ -1,4 +1,10 @@
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -17,5 +23,6 @@ export class CreateUserDto {
   @IsString()
   @MinLength(4)
   @MaxLength(20)
+  @IsOptional()
   readonly callNum: string;
 }

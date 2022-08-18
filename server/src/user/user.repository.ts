@@ -8,74 +8,134 @@ import { User } from './entities/user.entity';
 export class UserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const { username, email, password }: CreateUserDto = createUserDto;
-    return await this.databaseService.getConnection().query(`
-    INSERT INTO user 
-    (username, email, password) 
-    VALUES ("${username}","${email}","${password}");
-    `);
-  }
-
-  async findAll() {
-    const users = await this.databaseService.query(`
-    SELECT * FROM user ORDER BY created_time DESC;
-    `);
-    return users;
-  }
-
-  async findOne(id: number) {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const user = await this.databaseService.query(`
-          SELECT * 
-          FROM user 
-          WHERE id = ${id};`);
-      return user[0][0];
+      const code = await this.databaseService.genCode();
+      const { name, email, passwd, callNum } = createUserDto;
+      await this.databaseService.beginTransaction();
+      await this.databaseService.query(`
+      INSERT INTO user 
+      (code, name, email, passwd, callNum) 
+      VALUES ("${code}","${name}","${email}", "${passwd}", "${callNum}");
+      `);
+      const data = await this.databaseService.query(`
+      SELECT * FROM user WHERE code="${code}";
+      `);
+
+      await this.databaseService.commit();
+      const user: User = data[0];
+      return user;
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }
 
-  async findOneByEmail(email: string) {
+  async findAll(): Promise<User[]> {
     try {
-      const user = await this.databaseService.query(`
-          SELECT * 
-          FROM user 
-          WHERE email = ${email};`);
-      return user[0][0];
+      const usersData: object = await this.databaseService.query(`
+      SELECT * FROM user;
+      `);
+      const users: any = usersData;
+      console.log(users);
+      return users;
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }
 
-  async update(user: User) {
-    const { id, username, email, password }: User = user;
-    await this.databaseService.beginTransaction();
-
-    await this.databaseService.query(`
-    UPDATE user
-    SET
-    username='${username}',
-    email='${email}',
-    password='${password}'
-    WHERE id=${id};
-    `);
-
-    const updatedUser = await this.databaseService.query(`
-    SELECT * FROM user WHERE id=${id}`);
-
-    await this.databaseService.commit();
-
-    return updatedUser;
+  async findOne(idx: number): Promise<User> {
+    try {
+      const userData = await this.databaseService.query(`
+          SELECT * 
+          FROM user 
+          WHERE idx = ${idx};`);
+      const user: User = userData[0];
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
-  async remove(id: number) {
+  async findOneByEmail(email: string): Promise<User> {
     try {
-      return await this.databaseService.query(`
+      const userData = await this.databaseService.query(`
+          SELECT * 
+          FROM user 
+          WHERE email = '${email}';`);
+      console.log(userData);
+      const user: User = userData[0];
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async findOneByCode(code: string): Promise<User> {
+    try {
+      const userData = await this.databaseService.query(`
+      SELECT * FROM user WHERE code='${code}'
+      `);
+      const user: User = userData[0];
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async update(toUpdate: User): Promise<User> {
+    try {
+      const { idx, name, email, passwd, callNum } = toUpdate;
+      await this.databaseService.beginTransaction();
+
+      await this.databaseService.query(`
+      UPDATE user
+      SET
+      name='${name}',
+      email='${email}',
+      passwd='${passwd}',
+      callNum='${callNum}'
+  
+      WHERE idx=${idx};
+      `);
+      const userData = await this.databaseService.query(`
+          SELECT * 
+          FROM user 
+          WHERE idx = ${idx};`);
+
+      await this.databaseService.commit();
+
+      const user: User = userData[0];
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async remove(idx: number): Promise<User> {
+    try {
+      await this.databaseService.beginTransaction();
+      const userData = await this.databaseService.query(`
+      SELECT * FROM user WHERE idx=${idx};
+      `);
+
+      await this.databaseService.query(`
           DELETE from user
-          WHERE id=${id}
+          WHERE idx=${idx}
           `);
+
+      await this.databaseService.commit();
+
+      const user: User = userData[0];
+
+      return user;
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }
