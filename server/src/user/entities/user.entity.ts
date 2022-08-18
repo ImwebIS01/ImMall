@@ -7,8 +7,9 @@ interface UserInterface {
   readonly name: string;
   readonly email: string;
   readonly passwd: string;
-  readonly jointime: Date;
-  readonly callnum: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly callNum: string;
 }
 
 export class User implements UserInterface {
@@ -17,8 +18,9 @@ export class User implements UserInterface {
   readonly name: string;
   readonly email: string;
   readonly passwd: string;
-  readonly jointime: Date;
-  readonly callnum: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly callNum: string;
 
   constructor(
     idx: number,
@@ -26,15 +28,17 @@ export class User implements UserInterface {
     name: string,
     email: string,
     passwd: string,
-    jointime: Date,
-    callnum: string
+    createdAt: Date,
+    updatedAt: Date,
+    callNum: string
   ) {
     this.idx = idx;
     this.code = code;
     this.name = name;
     this.email = email;
     this.passwd = passwd;
-    this.jointime = jointime;
-    this.callnum = callnum;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.callNum = callNum;
   }
 }
