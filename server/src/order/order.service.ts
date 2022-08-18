@@ -45,17 +45,50 @@ export class OrderService {
     try {
       const order: Order = await this.orderRepository.findOne(id);
 
-      console.log(order);
-      //   const username = updateOrderDto.username
-      //     ? updateOrderDto.username
-      //     : order.username;
-      //   const email = updateOrderDto.email ? updateOrderDto.email : order.email;
-      //   const password = updateOrderDto.password
-      //     ? updateOrderDto.password
-      //     : order.password;
+      console.log(updateOrderDto);
+      const code = updateOrderDto.code ? updateOrderDto.code : order.code;
+      const siteCode = updateOrderDto.siteCode
+        ? updateOrderDto.siteCode
+        : order.siteCode;
+      const orderNumber = updateOrderDto.orderNumber
+        ? updateOrderDto.orderNumber
+        : order.orderNumber;
+      const ordererEmail = updateOrderDto.ordererEmail
+        ? updateOrderDto.ordererEmail
+        : order.ordererEmail;
+      const ordererName = updateOrderDto.ordererName
+        ? updateOrderDto.ordererName
+        : order.ordererName;
+      const ordererCall = updateOrderDto.ordererCall
+        ? updateOrderDto.ordererCall
+        : order.ordererCall;
+      const ordererCall2 = updateOrderDto.ordererCall2
+        ? updateOrderDto.ordererCall2
+        : order.ordererCall2;
+      const orderTime = updateOrderDto.orderTime
+        ? updateOrderDto.orderTime
+        : order.orderTime;
+      const completeTime = updateOrderDto.completeTime
+        ? updateOrderDto.completeTime
+        : order.completeTime;
+      const count = updateOrderDto.count ? updateOrderDto.count : order.count;
+      const price = updateOrderDto.price ? updateOrderDto.price : order.price;
 
-      //   const newUser: Order = new Order(id, username, email, password);
-      //   await this.orderRepository.update(newUser);
+      const newOrder: Order = new Order(
+        id,
+        code,
+        siteCode,
+        orderNumber,
+        ordererEmail,
+        ordererName,
+        ordererCall,
+        ordererCall2,
+        orderTime,
+        completeTime,
+        count,
+        price
+      );
+      await this.orderRepository.update(newOrder);
     } catch (error) {
       throw error;
     }

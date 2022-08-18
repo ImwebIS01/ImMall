@@ -83,30 +83,38 @@ export class OrderRepository {
     }
   }
 
-  //   async update(order: Order) {
-  //     const {
-  //       id,
-  //       code,
-  //       siteCode,
-  //       orderNumber,
-  //       ordererEmail,
-  //       ordererName,
-  //       ordererCall,
-  //       ordererCall2,
-  //       orderTime,
-  //       completeTime,
-  //       count,
-  //       price,
-  //     }: Order = order;
-  //     return this.databaseService.getConnection().query(`
-  //     UPDATE test1.order
-  //     SET
-  //     username='${username}',
-  //     email='${email}',
-  //     password='${password}'
-  //     WHERE id=${id};
-  //     `);
-  //   }
+  async update(order: Order) {
+    const {
+      id,
+      code,
+      siteCode,
+      orderNumber,
+      ordererEmail,
+      ordererName,
+      ordererCall,
+      ordererCall2,
+      orderTime,
+      completeTime,
+      count,
+      price,
+    }: Order = order;
+    return this.databaseService.getConnection().query(`
+      UPDATE test1.order
+      SET
+      code='${code}',
+      siteCode='${siteCode}',
+      orderNumber='${orderNumber}',
+      ordererEmail='${ordererEmail}',
+      ordererName='${ordererName}',
+      ordererCall='${ordererCall}',
+      ordererCall2='${ordererCall2}',
+      orderTime='${orderTime}',
+      completeTime='${completeTime}',
+      count='${count}',
+      price='${price}'
+      WHERE id=${id};
+      `);
+  }
 
   async remove(id: number) {
     try {
