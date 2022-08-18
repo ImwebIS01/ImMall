@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 
 @Injectable()
 export class DatabaseService {
-  connection: Connection;
+  private connection: Connection;
   constructor() {
     dotenv.config();
     createConnection({
@@ -22,5 +22,18 @@ export class DatabaseService {
 
   getConnection() {
     return this.connection;
+  }
+
+  async query(sql: string) {
+    const data = await this.connection.query(sql);
+    return data[0];
+  }
+
+  async beginTransaction() {
+    return this.connection.beginTransaction();
+  }
+
+  async commit() {
+    return this.connection.commit();
   }
 }

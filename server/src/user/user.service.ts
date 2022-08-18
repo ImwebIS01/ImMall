@@ -29,8 +29,9 @@ export class UserService {
 
   async getAll(): Promise<any> {
     try {
-      const users = await this.userRepository.findAll();
-      return users;
+      const data = await this.userRepository.findAll();
+      const user = data[0];
+      return user;
     } catch (error) {
       throw error;
     }
@@ -56,7 +57,7 @@ export class UserService {
         : user.password;
 
       const newUser: User = new User(id, username, email, password);
-      await this.userRepository.update(newUser);
+      return this.userRepository.update(newUser);
     } catch (error) {
       throw error;
     }

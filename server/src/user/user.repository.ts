@@ -18,16 +18,15 @@ export class UserRepository {
   }
 
   async findAll() {
-    const users = await this.databaseService.getConnection().query(`
+    const users = await this.databaseService.query(`
     SELECT * FROM user ORDER BY created_time DESC;
     `);
-    console.log(users);
     return users;
   }
 
   async findOne(id: number) {
     try {
-      const user = await this.databaseService.getConnection().query(`
+      const user = await this.databaseService.query(`
           SELECT * 
           FROM user 
           WHERE id = ${id};`);
@@ -39,7 +38,7 @@ export class UserRepository {
 
   async findOneByEmail(email: string) {
     try {
-      const user = await this.databaseService.getConnection().query(`
+      const user = await this.databaseService.query(`
           SELECT * 
           FROM user 
           WHERE email = ${email};`);
@@ -51,20 +50,28 @@ export class UserRepository {
 
   async update(user: User) {
     const { id, username, email, password }: User = user;
-    return this.databaseService.getConnection().query(`
+    await this.databaseService.beginTransaction();
+
+    await this.databaseService.query(`
     UPDATE user
     SET
     username='${username}',
     email='${email}',
     password='${password}'
-
     WHERE id=${id};
     `);
+
+    const updatedUser = await this.databaseService.query(`
+    SELECT * FROM user WHERE id=${id}`);
+
+    await this.databaseService.commit();
+
+    return updatedUser;
   }
 
   async remove(id: number) {
     try {
-      return await this.databaseService.getConnection().query(`
+      return await this.databaseService.query(`
           DELETE from user
           WHERE id=${id}
           `);
