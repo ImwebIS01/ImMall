@@ -11,7 +11,7 @@ import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
 
 // input-output dto 모두 있어야 함
-
+@Injectable()
 export class UserService {
   constructor(
     private readonly databaseService: DatabaseService,
@@ -29,7 +29,6 @@ export class UserService {
 
   async getAll(): Promise<any> {
     try {
-      console.log(this.databaseService.connection);
       const users = await this.userRepository.findAll();
       return users;
     } catch (error) {

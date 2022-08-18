@@ -1,23 +1,19 @@
+import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
+@Injectable()
 export class UserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createUserDto: CreateUserDto) {
     const { username, email, password }: CreateUserDto = createUserDto;
     return await this.databaseService.getConnection().query(`
-    BEGIN TRANSACTION;
-
     INSERT INTO user 
     (username, email, password) 
     VALUES ("${username}","${email}","${password}");
-
-
-
-    COMMIT;
     `);
   }
 
