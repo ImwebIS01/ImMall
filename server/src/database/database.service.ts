@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Connection, createConnection } from 'mysql2/promise';
 import * as dotenv from 'dotenv';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class DatabaseService {
@@ -35,5 +36,13 @@ export class DatabaseService {
 
   async commit() {
     return this.connection.commit();
+  }
+
+  async genCode() {
+    const uuid = () => {
+      const tokens = v4().split('-');
+      return tokens[2] + tokens[1] + tokens[0] + tokens[3] + tokens[4];
+    };
+    return uuid();
   }
 }
