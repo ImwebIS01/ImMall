@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 
 @Injectable()
 export class DatabaseService {
-  private connection: Connection;
+  connection: Connection;
   constructor() {
     dotenv.config();
     createConnection({

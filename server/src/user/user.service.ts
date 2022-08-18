@@ -9,9 +9,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
-import * as bcrypt from 'bcryptjs';
-import { AuthCredentialDto } from './dto/auth-credential.dto';
-import { JwtService } from '@nestjs/jwt';
 
 // input-output dto 모두 있어야 함
 
@@ -32,7 +29,9 @@ export class UserService {
 
   async getAll(): Promise<any> {
     try {
-      return this.userRepository.findAll();
+      console.log(this.databaseService.connection);
+      const users = await this.userRepository.findAll();
+      return users;
     } catch (error) {
       throw error;
     }
