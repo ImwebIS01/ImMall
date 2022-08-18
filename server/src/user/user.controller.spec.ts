@@ -24,4 +24,4 @@ describe('UserController', () => {
   //     expect(await controller.findAll()).toBe(result);
   //   });
   // }
-})
+});
