@@ -8,10 +8,9 @@ import { ProductRepository } from './products.repository';
 export class ProductsService {
   constructor(private readonly productRepository: ProductRepository) {}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto): Promise<Product> {
     try {
-      await this.productRepository.create(createProductDto);
-      return true;
+      return await this.productRepository.create(createProductDto);
     } catch (error) {
       throw error;
     }
@@ -25,7 +24,7 @@ export class ProductsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Product> {
     try {
       return this.productRepository.findOne(id);
     } catch (error) {
@@ -33,7 +32,10 @@ export class ProductsService {
     }
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto
+  ): Promise<Product> {
     try {
       const product: Product = await this.productRepository.findOne(id);
       const productname = updateProductDto.productname
@@ -51,7 +53,7 @@ export class ProductsService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Product> {
     try {
       return await this.productRepository.remove(id);
     } catch (error) {

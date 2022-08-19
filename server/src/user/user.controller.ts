@@ -17,22 +17,32 @@ export class UserController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    return this.userService.register(createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  getAll() {
+    return this.userService.getAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  getOne(@Param('idx') idx: number) {
+    return this.userService.getOne(+idx);
+  }
+
+  @Get('code/:code')
+  getOneByCode(@Param('code') code: string) {
+    return this.userService.getOneByCode(code);
+  }
+
+  @Get('email/:email')
+  getOneByEmail(@Param('email') email: string) {
+    return this.userService.getOneByEmail(email);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.setOne(+id, updateUserDto);
   }
 
   @Delete(':id')

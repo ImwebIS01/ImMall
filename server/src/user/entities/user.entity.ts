@@ -1,26 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 
-export class User {
-  @ApiProperty({
-    description: '고유 id',
-  })
-  readonly id: number;
-
-  @MinLength(4)
-  @MaxLength(20)
-  @ApiProperty({
-    description: '닉네임(4~20자, 영문 대소문자, 한글, 숫자만 가능)',
-  })
-  readonly username: string;
-
-  @IsEmail()
-  @ApiProperty({ description: '이메일' })
+interface UserInterface {
+  readonly idx: number;
+  readonly name: string;
   readonly email: string;
+  readonly passwd: string;
+  readonly callNum: string;
+  readonly created_time: Date;
+}
 
-  @IsString()
-  @MinLength(4)
-  @MaxLength(20)
-  @ApiProperty({ description: '비밀번호(4~20자)' })
-  readonly password: string;
+export class User implements UserInterface {
+  readonly idx: number;
+  readonly name: string;
+  readonly email: string;
+  readonly passwd: string;
+  readonly callNum: string;
+  readonly created_time: Date;
+
+  constructor(
+    idx: number,
+    name: string,
+    email: string,
+    passwd: string,
+    callNum: string
+  ) {
+    this.idx = idx;
+    this.name = name;
+    this.email = email;
+    this.passwd = passwd;
+    this.callNum = callNum;
+    0;
+  }
 }

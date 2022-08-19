@@ -2,44 +2,88 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductRepository {
   constructor(private readonly databaseService: DatabaseService) {}
-  async create(createProductDto: CreateProductDto) {
-    const { productname, price, info }: CreateProductDto = createProductDto;
-    return await this.databaseService.getConnection().query(`
+  async create(createProductDto: CreateProductDto): Promise<Product> {
+    try {
+      const { productname, price, info }: CreateProductDto = createProductDto;
+      await this.databaseService.beginTransaction();
+      const product = await this.databaseService.query(`
           INSERT INTO test2.product 
           (productname, price, info) 
           VALUES ("${productname}","${price}","${info}");
           `);
+      await this.databaseService.commit();
+      return product[0];
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   async findAll() {
-    return await this.databaseService.getConnection().query(`
+    try {
+      await this.databaseService.beginTransaction();
+      const productData: object = await this.databaseService.query(`
     SELECT * FROM test2.product;
     `);
+      await this.databaseService.commit();
+      return productData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
-  async findOne(id: number) {
-    const product = await this.databaseService.getConnection().query(`
+  async findOne(id: number): Promise<Product> {
+    try {
+      await this.databaseService.beginTransaction();
+      const productdata = await this.databaseService.query(`
       SELECT * FROM test2.product WHERE id = ${id}`);
-    return product[0][0];
+      await this.databaseService.commit();
+      const product: Product = productdata[0];
+      return product;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
-    const { productname, price, info }: UpdateProductDto = updateProductDto;
-    return await this.databaseService.getConnection().query(`
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto
+  ): Promise<Product> {
+    try {
+      const { productname, price, info }: UpdateProductDto = updateProductDto;
+      await this.databaseService.beginTransaction();
+      const product = await this.databaseService.query(`
     UPDATE test2.product 
     SET productname ='${productname}',
         price = '${price}',
         info = '${info}'
         WHERE id =${id};
     `);
+      await this.databaseService.commit();
+      return product[0];
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
-  async remove(id: number) {
-    return await this.databaseService.getConnection().query(`
+  async remove(id: number): Promise<Product> {
+    try {
+      await this.databaseService.beginTransaction();
+      const product = await this.databaseService.query(`
     DELETE FROM test2.product WHERE id=${id};`);
+      await this.databaseService.commit();
+      return product[0];
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }
