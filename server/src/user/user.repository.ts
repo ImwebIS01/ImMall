@@ -37,7 +37,6 @@ export class UserRepository {
       SELECT * FROM user;
       `);
       const users: any = usersData;
-      console.log(users);
       return users;
     } catch (error) {
       console.log(error);
