@@ -31,7 +31,7 @@ export class OrderRepository {
 
       price,
     }: CreateOrderDto = createOrderDto;
-    return await this.databaseService.getConnection().query(`
+    return await this.databaseService.query(`
     INSERT INTO test1.order
     (
       code,
@@ -52,7 +52,7 @@ export class OrderRepository {
   }
 
   async findAll() {
-    const orders = await this.databaseService.getConnection().query(`
+    const orders = await this.databaseService.query(`
     SELECT * FROM test1.order ORDER BY createdAt DESC;
     `);
     console.log(orders[0]);
@@ -61,7 +61,7 @@ export class OrderRepository {
 
   async findOne(id: number) {
     try {
-      const order = await this.databaseService.getConnection().query(`
+      const order = await this.databaseService.query(`
           SELECT * 
           FROM test1.order 
           WHERE id = ${id};`);
@@ -73,7 +73,7 @@ export class OrderRepository {
 
   async findOneByEmail(email: string) {
     try {
-      const user = await this.databaseService.getConnection().query(`
+      const user = await this.databaseService.query(`
           SELECT * 
           FROM test1.order 
           WHERE email = ${email};`);
@@ -98,7 +98,7 @@ export class OrderRepository {
       count,
       price,
     }: Order = order;
-    return this.databaseService.getConnection().query(`
+    return this.databaseService.query(`
       UPDATE test1.order
       SET
       code='${code}',
@@ -118,7 +118,7 @@ export class OrderRepository {
 
   async remove(id: number) {
     try {
-      return await this.databaseService.getConnection().query(`
+      return await this.databaseService.query(`
           DELETE from test1.order
           WHERE id=${id}
           `);
