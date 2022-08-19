@@ -13,10 +13,7 @@ import { UserRepository } from './user.repository';
 // input-output dto 모두 있어야 함
 @Injectable()
 export class UserService {
-  constructor(
-    private readonly databaseService: DatabaseService,
-    private readonly userRepository: UserRepository
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async register(createUserDto: CreateUserDto): Promise<User> {
     try {
