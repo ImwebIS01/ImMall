@@ -38,15 +38,44 @@ export class ProductsService {
   ): Promise<Product> {
     try {
       const product: Product = await this.productRepository.findOne(id);
-      const productname = updateProductDto.productname
-        ? updateProductDto.productname
-        : product.productname;
+      const no = updateProductDto.no ? updateProductDto.no : product.no;
+      const siteCode = updateProductDto.siteCode
+        ? updateProductDto.siteCode
+        : product.siteCode;
+      const code = updateProductDto.code ? updateProductDto.code : product.code;
+      const prodStatus = updateProductDto.prodStatus
+        ? updateProductDto.prodStatus
+        : product.prodStatus;
+      const prodCode = updateProductDto.prodCode
+        ? updateProductDto.prodCode
+        : product.prodCode;
+      const name = updateProductDto.name ? updateProductDto.name : product.name;
       const price = updateProductDto.price
         ? updateProductDto.price
         : product.price;
-      const info = updateProductDto.info ? updateProductDto.info : product.info;
+      const content = updateProductDto.content
+        ? updateProductDto.content
+        : product.content;
+      const simpleContent = updateProductDto.simpleContent
+        ? updateProductDto.simpleContent
+        : product.simpleContent;
+      const imgUrl = updateProductDto.imgUrl
+        ? updateProductDto.imgUrl
+        : product.imgUrl;
 
-      const newProduct: Product = new Product(id, productname, price, info);
+      const newProduct: Product = new Product(
+        id,
+        no,
+        siteCode,
+        code,
+        prodStatus,
+        prodCode,
+        name,
+        price,
+        content,
+        simpleContent,
+        imgUrl
+      );
       return await this.productRepository.update(id, newProduct);
     } catch (error) {
       throw error;

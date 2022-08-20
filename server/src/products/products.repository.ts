@@ -9,12 +9,42 @@ export class ProductRepository {
   constructor(private readonly databaseService: DatabaseService) {}
   async create(createProductDto: CreateProductDto): Promise<Product> {
     try {
-      const { productname, price, info }: CreateProductDto = createProductDto;
+      const {
+        no,
+        siteCode,
+        code,
+        prodStatus,
+        prodCode,
+        name,
+        price,
+        content,
+        simpleContent,
+        imgUrl,
+      }: CreateProductDto = createProductDto;
+
       await this.databaseService.beginTransaction();
       const product = await this.databaseService.query(`
           INSERT INTO test2.product 
-          (productname, price, info) 
-          VALUES ("${productname}","${price}","${info}");
+          (no,
+            siteCode,
+            code,
+            prodStatus,
+            prodCode,
+            name,
+            price,
+            content,
+            simpleContent,
+            imgUrl) 
+          VALUES ('${no}',
+          '${siteCode}',
+          '${code}',
+          '${prodStatus}',
+          '${prodCode}',
+          '${name}',
+          '${price}',
+          '${content}',
+          '${simpleContent}',
+          '${imgUrl}');
           `);
       await this.databaseService.commit();
       return product[0];
@@ -57,14 +87,33 @@ export class ProductRepository {
     updateProductDto: UpdateProductDto
   ): Promise<Product> {
     try {
-      const { productname, price, info }: UpdateProductDto = updateProductDto;
+      const {
+        no,
+        siteCode,
+        code,
+        prodStatus,
+        prodCode,
+        name,
+        price,
+        content,
+        simpleContent,
+        imgUrl,
+      }: UpdateProductDto = updateProductDto;
       await this.databaseService.beginTransaction();
       const product = await this.databaseService.query(`
     UPDATE test2.product 
-    SET productname ='${productname}',
-        price = '${price}',
-        info = '${info}'
-        WHERE id =${id};
+    SET 
+    no = '${no}',
+    siteCode =  '${siteCode}',
+    code =  '${code}',
+    prodStatus = '${prodStatus}',
+    prodCode = '${prodCode}',
+    name = '${name}',
+    price = '${price}',
+    content = '${content}',
+    simpleContent = '${simpleContent}',
+    imgUrl = '${imgUrl}'
+    WHERE id=${id};
     `);
       await this.databaseService.commit();
       return product[0];

@@ -1,15 +1,47 @@
 import { ApiProperty } from '@nestjs/swagger';
-
+import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class CreateProductDto {
-  @ApiProperty({ description: '고유 id' })
+  @IsNumber()
+  @IsNotEmpty()
   readonly id: number;
 
-  @ApiProperty({ description: '상품명' })
-  readonly productname: string;
+  @IsNumber()
+  @IsNotEmpty()
+  readonly no: number;
 
-  @ApiProperty({ description: '가격' })
+  @IsString()
+  @IsNotEmpty()
+  readonly siteCode: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly code: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly prodStatus: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly prodCode: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly name: string;
+
+  @IsNumber()
+  @IsNotEmpty()
   readonly price: number;
 
-  @ApiProperty({ description: '상품정보' })
-  readonly info: string;
+  @IsString()
+  @IsNotEmpty()
+  readonly content: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly simpleContent: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly imgUrl: string;
 }
