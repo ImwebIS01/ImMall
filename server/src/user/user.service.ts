@@ -52,9 +52,9 @@ export class UserService {
     }
   }
 
-  async getAll(): Promise<GetUserDto[]> {
+  async getAll(page: number, perPage: number): Promise<GetUserDto[]> {
     try {
-      return await this.userRepository.findAll();
+      return await this.userRepository.findAll(page, perPage);
     } catch (error) {
       throw error;
     }

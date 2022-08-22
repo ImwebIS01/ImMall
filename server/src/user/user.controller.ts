@@ -8,6 +8,8 @@ import {
   Delete,
   Res,
   UseGuards,
+  UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -35,13 +37,13 @@ export class UserController {
     @Res() res: Response
   ) {
     const token = await this.userService.login(authCredentialDto);
-    console.log(token);
     return res.cookie('token', token).json(true);
   }
 
   @Get()
-  async getAll() {
-    return this.userService.getAll();
+  async getAll(@Query() query) {
+    const { page, perPage } = query;
+    return this.userService.getAll(+page, +perPage);
   }
 
   @Get(':idx')
@@ -57,7 +59,8 @@ export class UserController {
   @Get('email/:email')
   @UseGuards(AuthGuard())
   async getOneByEmail(@GetUser() user: User, @Param('email') email: string) {
-    return this.userService.getOneByEmail(email);
+    if (user.email === email) return this.userService.getOneByEmail(email);
+    throw new UnauthorizedException();
   }
 
   @Patch(':id')

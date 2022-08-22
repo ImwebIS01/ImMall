@@ -32,12 +32,21 @@ export class UserRepository {
     }
   }
 
-  async findAll(): Promise<GetUserDto[]> {
+  async findAll(page: number, perPage: number): Promise<GetUserDto[]> {
     try {
+      await this.databaseService.beginTransaction();
+      const firstOne = await this.databaseService.query(`
+      SELECT * FROM user ORDER BY idx ASC LIMIT 1`);
+      const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
+      // const user_code = 'user_code1004';
+      // const cursor = parseInt(user_code.slice(9, 13));
       const usersData: object = await this.databaseService.query(`
-      SELECT * FROM user;
+      SELECT * FROM user where idx >= ${startIndex} ORDER BY idx ASC LIMIT ${10};
       `);
+      await this.databaseService.commit();
+
       const users: any = usersData;
+      console.log(startIndex);
       return users;
     } catch (error) {
       console.log(error);
