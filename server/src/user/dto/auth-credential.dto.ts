@@ -8,5 +8,5 @@ export class AuthCredentialDto {
 
   @IsString()
   @ApiProperty({ description: '비밀번호(4~20자)' })
-  password: string;
+  passwd: string;
 }

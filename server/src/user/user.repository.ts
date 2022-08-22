@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
@@ -8,7 +9,7 @@ import { User } from './entities/user.entity';
 export class UserRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async save(createUserDto: CreateUserDto): Promise<GetUserDto> {
     try {
       const code = await this.databaseService.genCode();
       const { name, email, passwd, callNum } = createUserDto;
@@ -23,7 +24,7 @@ export class UserRepository {
       `);
 
       await this.databaseService.commit();
-      const user: User = data[0];
+      const user: GetUserDto = data[0];
       return user;
     } catch (error) {
       console.log(error);
@@ -31,7 +32,7 @@ export class UserRepository {
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<GetUserDto[]> {
     try {
       const usersData: object = await this.databaseService.query(`
       SELECT * FROM user;
@@ -44,7 +45,7 @@ export class UserRepository {
     }
   }
 
-  async findOne(idx: number): Promise<User> {
+  async findOne(idx: number): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
           SELECT * 
@@ -58,13 +59,13 @@ export class UserRepository {
     }
   }
 
-  async findOneByEmail(email: string): Promise<User> {
+  async findOneByEmail(email: string) {
     try {
       const userData = await this.databaseService.query(`
           SELECT * 
           FROM user 
           WHERE email = '${email}';`);
-      console.log(userData);
+
       const user: User = userData[0];
       return user;
     } catch (error) {
@@ -73,7 +74,7 @@ export class UserRepository {
     }
   }
 
-  async findOneByCode(code: string): Promise<User> {
+  async findOneByCode(code: string): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
       SELECT * FROM user WHERE code='${code}'
@@ -86,7 +87,7 @@ export class UserRepository {
     }
   }
 
-  async update(toUpdate: User): Promise<User> {
+  async update(toUpdate: User): Promise<GetUserDto> {
     try {
       const { idx, name, email, passwd, callNum } = toUpdate;
       await this.databaseService.beginTransaction();
@@ -116,7 +117,7 @@ export class UserRepository {
     }
   }
 
-  async remove(idx: number): Promise<User> {
+  async remove(idx: number): Promise<GetUserDto> {
     try {
       await this.databaseService.beginTransaction();
       const userData = await this.databaseService.query(`
