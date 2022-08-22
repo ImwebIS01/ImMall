@@ -17,6 +17,7 @@ export class User implements UserInterface {
   readonly passwd: string;
   readonly callNum: string;
   readonly created_time: Date;
+  isAdmin: any;
 
   constructor(
     idx: number,
