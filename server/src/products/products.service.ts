@@ -1,16 +1,53 @@
 import { Injectable } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
-import { ProductRepository } from './products.repository';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly productRepository: ProductRepository) {}
+  private readonly databaseService: DatabaseService;
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
     try {
-      return await this.productRepository.create(createProductDto);
+      const {
+        no,
+        siteCode,
+        code,
+        prodStatus,
+        prodCode,
+        name,
+        price,
+        content,
+        simpleContent,
+        imgUrl,
+      }: CreateProductDto = createProductDto;
+
+      const product = await this.databaseService.query(`
+          INSERT INTO test2.product 
+          (no,
+            siteCode,
+            code,
+            prodStatus,
+            prodCode,
+            name,
+            price,
+            content,
+            simpleContent,
+            imgUrl) 
+          VALUES ('${no}',
+          '${siteCode}',
+          '${code}',
+          '${prodStatus}',
+          '${prodCode}',
+          '${name}',
+          '${price}',
+          '${content}',
+          '${simpleContent}',
+          '${imgUrl}');
+          `);
+      await this.databaseService.commit();
+      return product[0];
     } catch (error) {
       throw error;
     }
@@ -18,7 +55,10 @@ export class ProductsService {
 
   async findAll() {
     try {
-      return this.productRepository.findAll();
+      const productData: object = await this.databaseService.query(`
+    SELECT * FROM test2.product;
+    `);
+      return productData;
     } catch (error) {
       throw error;
     }
@@ -26,7 +66,11 @@ export class ProductsService {
 
   async findOne(id: number): Promise<Product> {
     try {
-      return this.productRepository.findOne(id);
+      const productdata = await this.databaseService.query(`
+      SELECT * FROM test2.product WHERE id = ${id}`);
+      await this.databaseService.commit();
+      const product: Product = productdata[0];
+      return product;
     } catch (error) {
       throw error;
     }
@@ -37,7 +81,7 @@ export class ProductsService {
     updateProductDto: UpdateProductDto
   ): Promise<Product> {
     try {
-      const product: Product = await this.productRepository.findOne(id);
+      const product: Product = await this.findOne(id);
       const no = updateProductDto.no ? updateProductDto.no : product.no;
       const siteCode = updateProductDto.siteCode
         ? updateProductDto.siteCode
@@ -63,20 +107,23 @@ export class ProductsService {
         ? updateProductDto.imgUrl
         : product.imgUrl;
 
-      const newProduct: Product = new Product(
-        id,
-        no,
-        siteCode,
-        code,
-        prodStatus,
-        prodCode,
-        name,
-        price,
-        content,
-        simpleContent,
-        imgUrl
-      );
-      return await this.productRepository.update(id, newProduct);
+      const newProduct = await this.databaseService.query(`
+    UPDATE test2.product 
+    SET 
+    no = '${no}',
+    siteCode =  '${siteCode}',
+    code =  '${code}',
+    prodStatus = '${prodStatus}',
+    prodCode = '${prodCode}',
+    name = '${name}',
+    price = '${price}',
+    content = '${content}',
+    simpleContent = '${simpleContent}',
+    imgUrl = '${imgUrl}'
+    WHERE id=${id};
+    `);
+      await this.databaseService.commit();
+      return newProduct[0];
     } catch (error) {
       throw error;
     }
@@ -84,7 +131,10 @@ export class ProductsService {
 
   async remove(id: number): Promise<Product> {
     try {
-      return await this.productRepository.remove(id);
+      const product = await this.databaseService.query(`
+    DELETE FROM test2.product WHERE id=${id};`);
+      await this.databaseService.commit();
+      return product[0];
     } catch (error) {
       throw error;
     }

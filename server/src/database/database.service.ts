@@ -25,7 +25,9 @@ export class DatabaseService {
   }
 
   async query(sql: string) {
-    const data = await this.pool.query(sql);
+    const conn = await this.pool.getConnection();
+    const data = await conn.query(sql);
+    conn.release();
     return data[0];
   }
 
