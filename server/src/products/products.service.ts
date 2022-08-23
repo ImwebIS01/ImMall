@@ -6,8 +6,7 @@ import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
-  private readonly databaseService: DatabaseService;
-
+  constructor(private readonly databaseService: DatabaseService) {}
   async create(createProductDto: CreateProductDto): Promise<Product> {
     try {
       const {
@@ -46,7 +45,6 @@ export class ProductsService {
           '${simpleContent}',
           '${imgUrl}');
           `);
-      await this.databaseService.commit();
       return product[0];
     } catch (error) {
       throw error;
@@ -68,7 +66,6 @@ export class ProductsService {
     try {
       const productdata = await this.databaseService.query(`
       SELECT * FROM test2.product WHERE id = ${id}`);
-      await this.databaseService.commit();
       const product: Product = productdata[0];
       return product;
     } catch (error) {
@@ -122,7 +119,6 @@ export class ProductsService {
     imgUrl = '${imgUrl}'
     WHERE id=${id};
     `);
-      await this.databaseService.commit();
       return newProduct[0];
     } catch (error) {
       throw error;
