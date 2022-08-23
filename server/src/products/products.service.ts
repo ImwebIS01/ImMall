@@ -78,45 +78,42 @@ export class ProductsService {
     updateProductDto: UpdateProductDto
   ): Promise<Product> {
     try {
-      const product: Product = await this.findOne(id);
-      const no = updateProductDto.no ? updateProductDto.no : product.no;
-      const siteCode = updateProductDto.siteCode
-        ? updateProductDto.siteCode
-        : product.siteCode;
-      const code = updateProductDto.code ? updateProductDto.code : product.code;
-      const prodStatus = updateProductDto.prodStatus
-        ? updateProductDto.prodStatus
-        : product.prodStatus;
-      const prodCode = updateProductDto.prodCode
-        ? updateProductDto.prodCode
-        : product.prodCode;
-      const name = updateProductDto.name ? updateProductDto.name : product.name;
-      const price = updateProductDto.price
-        ? updateProductDto.price
-        : product.price;
-      const content = updateProductDto.content
-        ? updateProductDto.content
-        : product.content;
-      const simpleContent = updateProductDto.simpleContent
-        ? updateProductDto.simpleContent
-        : product.simpleContent;
-      const imgUrl = updateProductDto.imgUrl
-        ? updateProductDto.imgUrl
-        : product.imgUrl;
-
+      const productData = await this.databaseService.query(`
+      SELECT * FROM test2.product WHERE id = ${id}`);
+      const product: Product = productData[0];
       const newProduct = await this.databaseService.query(`
     UPDATE test2.product 
     SET 
-    no = '${no}',
-    siteCode =  '${siteCode}',
-    code =  '${code}',
-    prodStatus = '${prodStatus}',
-    prodCode = '${prodCode}',
-    name = '${name}',
-    price = '${price}',
-    content = '${content}',
-    simpleContent = '${simpleContent}',
-    imgUrl = '${imgUrl}'
+    no = IF(${updateProductDto.no != undefined},'${updateProductDto.no}','${
+        product.no
+      }'),
+    siteCode =  IF(${updateProductDto.siteCode != undefined},'${
+        updateProductDto.siteCode
+      }','${product.siteCode}'),
+    code =  IF(${updateProductDto.code != undefined},'${
+        updateProductDto.code
+      }','${product.code}'),
+    prodStatus = IF(${updateProductDto.prodStatus != undefined},'${
+        updateProductDto.prodStatus
+      }','${product.prodStatus}'),
+    prodCode = IF(${updateProductDto.prodCode != undefined},'${
+        updateProductDto.prodCode
+      }','${product.prodCode}'),
+    name = IF(${updateProductDto.name != undefined},'${
+        updateProductDto.name
+      }','${product.name}'),
+    price = IF(${updateProductDto.price != undefined},'${
+        updateProductDto.price
+      }','${product.price}'),
+    content = IF(${updateProductDto.content != undefined},'${
+        updateProductDto.content
+      }','${product.content}'),
+    simpleContent = IF(${updateProductDto.simpleContent != undefined},'${
+        updateProductDto.simpleContent
+      }','${product.simpleContent}'),
+    imgUrl = IF(${updateProductDto.imgUrl != undefined},'${
+        updateProductDto.imgUrl
+      }','${product.imgUrl}')
     WHERE id=${id};
     `);
       return newProduct[0];
