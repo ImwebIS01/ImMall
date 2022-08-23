@@ -3,7 +3,6 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
-import { UserRepository } from './user.repository';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
@@ -30,6 +29,6 @@ import { PassportModule } from '@nestjs/passport';
   ],
   exports: [UserService, JwtStrategy, PassportModule],
   controllers: [UserController],
-  providers: [UserService, UserRepository, DatabaseService, JwtStrategy],
+  providers: [UserService, DatabaseService, JwtStrategy],
 })
 export class UserModule {}
