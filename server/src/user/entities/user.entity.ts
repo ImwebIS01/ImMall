@@ -7,7 +7,8 @@ interface UserInterface {
   readonly email: string;
   readonly passwd: string;
   readonly callNum: string;
-  readonly created_time: Date;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
 }
 
 export class User implements UserInterface {
@@ -16,8 +17,8 @@ export class User implements UserInterface {
   readonly email: string;
   readonly passwd: string;
   readonly callNum: string;
-  readonly created_time: Date;
-  isAdmin: any;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
 
   constructor(
     idx: number,

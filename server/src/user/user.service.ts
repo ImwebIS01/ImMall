@@ -16,7 +16,7 @@ export class UserService {
     private jwtService: JwtService
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<GetUserDto> {
+  async register(createUserDto: CreateUserDto) {
     try {
       const salt: string = await bcrypt.genSalt();
       const hashedPasswd = await bcrypt.hash(createUserDto.passwd, salt);
@@ -24,8 +24,6 @@ export class UserService {
 
       const code = await this.databaseService.genCode();
       const { name, email, passwd, callNum } = createUserDto;
-
-      await this.databaseService.beginTransaction();
       await this.databaseService.query(`
       INSERT INTO user 
       (code, name, email, passwd, callNum) 
@@ -34,8 +32,6 @@ export class UserService {
       const data = await this.databaseService.query(`
       SELECT * FROM user WHERE code="${code}";
       `);
-
-      await this.databaseService.commit();
       const user: GetUserDto = data[0];
       return user;
     } catch (error) {
@@ -50,7 +46,8 @@ export class UserService {
       const userData = await this.databaseService.query(`
           SELECT * 
           FROM user 
-          WHERE email = '${email}';`);
+          WHERE email = '${email}';
+          `);
 
       const user = userData[0];
       if (user && (await bcrypt.compare(passwd, user.passwd))) {
@@ -65,16 +62,14 @@ export class UserService {
     }
   }
 
-  async getAll(page: number, perPage: number): Promise<GetUserDto[]> {
+  async getAll(page: number, perPage: number) {
     try {
-      await this.databaseService.beginTransaction();
       const firstOne = await this.databaseService.query(`
       SELECT * FROM user ORDER BY idx ASC LIMIT 1`);
       const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
       const usersData: object = await this.databaseService.query(`
       SELECT * FROM user where idx >= ${startIndex} ORDER BY idx ASC LIMIT ${perPage};
       `);
-      await this.databaseService.commit();
       const users: any = usersData;
       return users;
     } catch (error) {
@@ -135,9 +130,6 @@ export class UserService {
       const callNum = updateUserDto.callNum
         ? updateUserDto.callNum
         : user.callNum;
-
-      await this.databaseService.beginTransaction();
-
       await this.databaseService.query(`
         UPDATE user
         SET
@@ -164,7 +156,6 @@ export class UserService {
 
   async remove(idx: number): Promise<GetUserDto> {
     try {
-      await this.databaseService.beginTransaction();
       const userData = await this.databaseService.query(`
       SELECT * FROM user WHERE idx=${idx};
       `);
@@ -174,9 +165,7 @@ export class UserService {
           WHERE idx=${idx}
           `);
 
-      await this.databaseService.commit();
-
-      const user: User = userData[0];
+      const user: GetUserDto = userData[0];
 
       return user;
     } catch (error) {

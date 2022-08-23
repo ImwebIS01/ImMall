@@ -40,6 +40,11 @@ export class UserController {
     return res.cookie('token', token).json(true);
   }
 
+  @Get('test')
+  async test() {
+    return 'test';
+  }
+
   @Get()
   async getAll(@Query() query) {
     const { page, perPage } = query;
