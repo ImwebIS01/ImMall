@@ -13,6 +13,10 @@ export class GetUserDto {
   readonly idx: number;
 
   @ApiProperty()
+  @IsNumber()
+  readonly code: string;
+
+  @ApiProperty()
   @IsString()
   readonly name: string;
 
@@ -35,4 +39,8 @@ export class GetUserDto {
   @ApiProperty()
   @IsDate()
   readonly updatedAt: Date;
+
+  @ApiProperty()
+  @IsString()
+  readonly fk_user_site_code: string;
 }

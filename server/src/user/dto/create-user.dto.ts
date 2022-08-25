@@ -1,8 +1,8 @@
 import { IsEmail, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { User } from '../entities/user.entity';
 import { GetUserDto } from './get-user.dto';
+import { Optional } from '@nestjs/common';
 
 export class CreateUserDto extends PickType(PartialType(GetUserDto), [
   'name',
@@ -24,5 +24,6 @@ export class CreateUserDto extends PickType(PartialType(GetUserDto), [
 
   @ApiProperty()
   @IsString()
+  @Optional()
   readonly callNum: string;
 }
