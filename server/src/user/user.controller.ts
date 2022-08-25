@@ -16,11 +16,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { Response } from 'express';
-import { json } from 'stream/consumers';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUserDto } from './dto/get-user.dto';
 import { GetUser } from 'src/custom.decorator';
-import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -36,7 +34,9 @@ export class UserController {
     @Body() authCredentialDto: AuthCredentialDto,
     @Res() res: Response
   ) {
-    const token = await this.userService.login(authCredentialDto);
+    const { token, expiresIn } = await this.userService.login(
+      authCredentialDto
+    );
     return res.cookie('token', token).json(true);
   }
 
@@ -46,13 +46,13 @@ export class UserController {
   }
 
   @Get()
-  async getAll(@Query() query) {
+  async getAll(@Query() query): Promise<GetUserDto[]> {
     const { page, perPage } = query;
     return this.userService.getAll(+page, +perPage);
   }
 
   @Get(':idx')
-  async getOne(@Param('idx') idx: number) {
+  async getOne(@Param('idx') idx: number): Promise<GetUserDto> {
     return this.userService.getOne(+idx);
   }
 
@@ -63,18 +63,24 @@ export class UserController {
 
   @Get('email/:email')
   @UseGuards(AuthGuard())
-  async getOneByEmail(@GetUser() user: User, @Param('email') email: string) {
+  async getOneByEmail(
+    @GetUser() user: GetUserDto,
+    @Param('email') email: string
+  ): Promise<GetUserDto> {
     if (user.email === email) return this.userService.getOneByEmail(email);
     throw new UnauthorizedException();
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto
+  ): Promise<GetUserDto> {
     return this.userService.setOne(+id, updateUserDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string): Promise<GetUserDto> {
     return this.userService.remove(+id);
   }
 }

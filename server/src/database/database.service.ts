@@ -20,7 +20,7 @@ export class DatabaseService {
     });
   }
 
-  async getConnection(cb) {
+  async getConnection() {
     return this.pool.getConnection();
   }
 
