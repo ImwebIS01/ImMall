@@ -1,16 +1,39 @@
 import { Injectable } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
-import { ProductRepository } from './products.repository';
+import { GetProductDto } from './dto/get-product.dto';
+import { object } from 'joi';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly productRepository: ProductRepository) {}
-
-  async create(createProductDto: CreateProductDto): Promise<Product> {
+  constructor(private readonly databaseService: DatabaseService) {}
+  async create(createProductDto: CreateProductDto) {
     try {
-      return await this.productRepository.create(createProductDto);
+      const product = await this.databaseService.query(`
+          INSERT INTO test2.product 
+          (no,
+            siteCode,
+            code,
+            prodStatus,
+            prodCode,
+            name,
+            price,
+            content,
+            simpleContent,
+            imgUrl) 
+          VALUES ('${createProductDto.no}',
+          '${createProductDto.siteCode}',
+          '${createProductDto.code}',
+          '${createProductDto.prodStatus}',
+          '${createProductDto.prodCode}',
+          '${createProductDto.name}',
+          '${createProductDto.price}',
+          '${createProductDto.content}',
+          '${createProductDto.simpleContent}',
+          '${createProductDto.imgUrl}');
+          `);
+      return product[0];
     } catch (error) {
       throw error;
     }
@@ -18,15 +41,21 @@ export class ProductsService {
 
   async findAll() {
     try {
-      return this.productRepository.findAll();
+      const productData: object = await this.databaseService.query(`
+    SELECT * FROM test2.product;
+    `);
+      return productData;
     } catch (error) {
       throw error;
     }
   }
 
-  async findOne(id: number): Promise<Product> {
+  async findOne(id: number): Promise<GetProductDto> {
     try {
-      return this.productRepository.findOne(id);
+      const productdata = await this.databaseService.query(`
+      SELECT * FROM test2.product WHERE id = ${id}`);
+      const product: GetProductDto = productdata[0];
+      return productdata[0];
     } catch (error) {
       throw error;
     }
@@ -35,56 +64,58 @@ export class ProductsService {
   async update(
     id: number,
     updateProductDto: UpdateProductDto
-  ): Promise<Product> {
+  ): Promise<GetProductDto> {
     try {
-      const product: Product = await this.productRepository.findOne(id);
-      const no = updateProductDto.no ? updateProductDto.no : product.no;
-      const siteCode = updateProductDto.siteCode
-        ? updateProductDto.siteCode
-        : product.siteCode;
-      const code = updateProductDto.code ? updateProductDto.code : product.code;
-      const prodStatus = updateProductDto.prodStatus
-        ? updateProductDto.prodStatus
-        : product.prodStatus;
-      const prodCode = updateProductDto.prodCode
-        ? updateProductDto.prodCode
-        : product.prodCode;
-      const name = updateProductDto.name ? updateProductDto.name : product.name;
-      const price = updateProductDto.price
-        ? updateProductDto.price
-        : product.price;
-      const content = updateProductDto.content
-        ? updateProductDto.content
-        : product.content;
-      const simpleContent = updateProductDto.simpleContent
-        ? updateProductDto.simpleContent
-        : product.simpleContent;
-      const imgUrl = updateProductDto.imgUrl
-        ? updateProductDto.imgUrl
-        : product.imgUrl;
-
-      const newProduct: Product = new Product(
-        id,
-        no,
-        siteCode,
-        code,
-        prodStatus,
-        prodCode,
-        name,
-        price,
-        content,
-        simpleContent,
-        imgUrl
-      );
-      return await this.productRepository.update(id, newProduct);
+      const productData = await this.databaseService.query(`
+      SELECT * FROM test2.product WHERE id = ${id}`);
+      const product: GetProductDto = productData[0];
+      const newProduct = await this.databaseService.query(`
+    UPDATE test2.product 
+    SET 
+    no = IF(${updateProductDto.no != undefined},'${updateProductDto.no}','${
+        product.no
+      }'),
+    siteCode =  IF(${updateProductDto.siteCode != undefined},'${
+        updateProductDto.siteCode
+      }','${product.siteCode}'),
+    code =  IF(${updateProductDto.code != undefined},'${
+        updateProductDto.code
+      }','${product.code}'),
+    prodStatus = IF(${updateProductDto.prodStatus != undefined},'${
+        updateProductDto.prodStatus
+      }','${product.prodStatus}'),
+    prodCode = IF(${updateProductDto.prodCode != undefined},'${
+        updateProductDto.prodCode
+      }','${product.prodCode}'),
+    name = IF(${updateProductDto.name != undefined},'${
+        updateProductDto.name
+      }','${product.name}'),
+    price = IF(${updateProductDto.price != undefined},'${
+        updateProductDto.price
+      }','${product.price}'),
+    content = IF(${updateProductDto.content != undefined},'${
+        updateProductDto.content
+      }','${product.content}'),
+    simpleContent = IF(${updateProductDto.simpleContent != undefined},'${
+        updateProductDto.simpleContent
+      }','${product.simpleContent}'),
+    imgUrl = IF(${updateProductDto.imgUrl != undefined},'${
+        updateProductDto.imgUrl
+      }','${product.imgUrl}')
+    WHERE id=${id};
+    `);
+      return newProduct[0];
     } catch (error) {
       throw error;
     }
   }
 
-  async remove(id: number): Promise<Product> {
+  async remove(id: number): Promise<GetProductDto> {
     try {
-      return await this.productRepository.remove(id);
+      const product = await this.databaseService.query(`
+    DELETE FROM test2.product WHERE id=${id};`);
+      await this.databaseService.commit();
+      return product[0];
     } catch (error) {
       throw error;
     }
