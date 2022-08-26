@@ -6,7 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { JwtService } from '@nestjs/jwt';
-import { User } from './entities/user.entity';
+import { TokenDto } from './dto/token.dto';
 
 // input-output dto 모두 있어야 함
 @Injectable()
@@ -19,23 +19,18 @@ export class UserService {
   async register(createUserDto: CreateUserDto): Promise<GetUserDto> {
     try {
       const salt: string = await bcrypt.genSalt();
-      const hashedPasswd = await bcrypt.hash(createUserDto.passwd, salt);
-      createUserDto.passwd = hashedPasswd;
-
-      const code = await this.databaseService.genCode();
-      const { name, email, passwd, callNum } = createUserDto;
-
-      await this.databaseService.beginTransaction();
+      const [hashedPasswd, code] = await Promise.all([
+        bcrypt.hash(createUserDto.passwd, salt),
+        this.databaseService.genCode(),
+      ]);
       await this.databaseService.query(`
       INSERT INTO user 
       (code, name, email, passwd, callNum) 
-      VALUES ("${code}","${name}","${email}", "${passwd}", "${callNum}");
+      VALUES ("${code}","${createUserDto.name}","${createUserDto.email}", "${hashedPasswd}", "${createUserDto.callNum}");
       `);
       const data = await this.databaseService.query(`
       SELECT * FROM user WHERE code="${code}";
       `);
-
-      await this.databaseService.commit();
       const user: GetUserDto = data[0];
       return user;
     } catch (error) {
@@ -43,20 +38,21 @@ export class UserService {
     }
   }
 
-  async login(authCredentialDto: AuthCredentialDto): Promise<string> {
+  async login(authCredentialDto: AuthCredentialDto): Promise<TokenDto> {
     try {
       const { email, passwd } = authCredentialDto;
 
       const userData = await this.databaseService.query(`
           SELECT * 
           FROM user 
-          WHERE email = '${email}';`);
+          WHERE email = '${email}';
+          `);
 
       const user = userData[0];
       if (user && (await bcrypt.compare(passwd, user.passwd))) {
         const payload = { name: user.name, email: email };
-        const accessToken = this.jwtService.sign(payload);
-        return accessToken;
+        const token = this.jwtService.sign(payload);
+        return { token, expiresIn: '1h' };
       } else {
         throw new UnauthorizedException('잘못된 이메일 또는 비밀번호 입니다.');
       }
@@ -67,14 +63,12 @@ export class UserService {
 
   async getAll(page: number, perPage: number): Promise<GetUserDto[]> {
     try {
-      await this.databaseService.beginTransaction();
       const firstOne = await this.databaseService.query(`
       SELECT * FROM user ORDER BY idx ASC LIMIT 1`);
       const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
       const usersData: object = await this.databaseService.query(`
       SELECT * FROM user where idx >= ${startIndex} ORDER BY idx ASC LIMIT ${perPage};
       `);
-      await this.databaseService.commit();
       const users: any = usersData;
       return users;
     } catch (error) {
@@ -127,7 +121,9 @@ export class UserService {
       SELECT * 
       FROM user 
       WHERE idx = ${idx};`);
-      const user: User = userData[0];
+      const user: GetUserDto = userData[0];
+      console.log(user);
+      const t: Object = { a: 1 };
 
       const name = updateUserDto.name ? updateUserDto.name : user.name;
       const email = updateUserDto.email ? updateUserDto.email : user.email;
@@ -135,13 +131,11 @@ export class UserService {
       const callNum = updateUserDto.callNum
         ? updateUserDto.callNum
         : user.callNum;
-
-      await this.databaseService.beginTransaction();
-
+      var a;
       await this.databaseService.query(`
         UPDATE user
         SET
-        name='${name}',
+        name=IF(${a === undefined}, '${'true'}', '${'false'}'),
         email='${email}',
         passwd='${passwd}',
         callNum='${callNum}'
@@ -164,7 +158,6 @@ export class UserService {
 
   async remove(idx: number): Promise<GetUserDto> {
     try {
-      await this.databaseService.beginTransaction();
       const userData = await this.databaseService.query(`
       SELECT * FROM user WHERE idx=${idx};
       `);
@@ -174,9 +167,7 @@ export class UserService {
           WHERE idx=${idx}
           `);
 
-      await this.databaseService.commit();
-
-      const user: User = userData[0];
+      const user: GetUserDto = userData[0];
 
       return user;
     } catch (error) {

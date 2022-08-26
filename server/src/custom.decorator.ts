@@ -4,11 +4,11 @@ import {
   ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from './user/entities/user.entity';
+import { GetUserDto } from './user/dto/get-user.dto';
 
 // @GetUser: Reqeust에서 user 가져오기
 export const GetUser = createParamDecorator(
-  (data, ctx: ExecutionContext): User => {
+  (data, ctx: ExecutionContext): GetUserDto => {
     const req = ctx.switchToHttp().getRequest();
     return req.user;
   }

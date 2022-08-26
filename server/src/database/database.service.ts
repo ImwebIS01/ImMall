@@ -21,15 +21,20 @@ export class DatabaseService {
   }
 
   async getConnection() {
-    await this.pool.getConnection();
+    return this.pool.getConnection();
   }
 
   async query(sql: string) {
-    const data = await this.pool.query(sql);
+    const conn = await this.pool.getConnection();
+    const data = await conn.query(sql);
+    conn.release();
     return data[0];
   }
 
-  async release() {}
+  async release() {
+    const conn = await this.pool.getConnection();
+    return conn.release();
+  }
 
   async beginTransaction() {
     const con = await this.pool.getConnection();
@@ -48,5 +53,9 @@ export class DatabaseService {
     };
 
     return uuid();
+  }
+
+  async end() {
+    return this.pool.end();
   }
 }

@@ -15,6 +15,6 @@ export class SaveUserDto extends PickType(PartialType(CreateUserDto), [
 ] as const) {
   @IsString()
   @MinLength(4)
-  @MaxLength(40)
+  @MaxLength(50)
   readonly passwd: string;
 }
