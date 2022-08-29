@@ -61,17 +61,21 @@ export class UserService {
     }
   }
 
-  async getAll(page: number, perPage: number): Promise<GetUserDto[]> {
+  async getAll(page: number, perPage: number): Promise<GetUserDto[] | object> {
     try {
       const firstOne = await this.databaseService.query(`
       SELECT * FROM user ORDER BY idx ASC LIMIT 1`);
+      if (firstOne[0] === undefined) {
+        return [];
+      }
       const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
       const usersData: object = await this.databaseService.query(`
-      SELECT * FROM user where idx >= ${startIndex} ORDER BY idx ASC LIMIT ${perPage};
+      SELECT * FROM user where idx >= ${startIndex} ORDER BY idx DESC LIMIT ${perPage};
       `);
       const users: any = usersData;
       return users;
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }
@@ -171,6 +175,21 @@ export class UserService {
 
       return user;
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async removeAll() {
+    try {
+      const connection = await this.databaseService.getConnection();
+      await this.databaseService.query(`
+      TRUNCATE TABLE user;
+      `);
+      return this.databaseService.query(`
+      SELECT * FROM user;
+      `);
+    } catch (error) {
+      console.log(error);
       throw error;
     }
   }

@@ -13,7 +13,6 @@ import { UserService } from './user.service';
 describe('UserController', () => {
   let userController: UserController;
   let userService: UserService;
-  let databaseService: DatabaseService;
 
   beforeEach(async () => {
     jest.mock('./user.service');

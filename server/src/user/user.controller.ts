@@ -46,7 +46,7 @@ export class UserController {
   }
 
   @Get()
-  async getAll(@Query() query): Promise<GetUserDto[]> {
+  async getAll(@Query() query): Promise<GetUserDto[] | object> {
     const { page, perPage } = query;
     return this.userService.getAll(+page, +perPage);
   }
@@ -82,5 +82,10 @@ export class UserController {
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<GetUserDto> {
     return this.userService.remove(+id);
+  }
+
+  @Delete('list/all')
+  async removeAll() {
+    return this.userService.removeAll();
   }
 }
