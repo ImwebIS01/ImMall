@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 
+/* 유저의 모든 정보를 가져오는 DTO */
 export class GetUserDto {
   @ApiProperty()
   @IsNumber()
@@ -34,13 +35,13 @@ export class GetUserDto {
 
   @ApiProperty()
   @IsDate()
-  readonly createdAt: Date;
+  readonly createdTime: Date;
 
   @ApiProperty()
   @IsDate()
-  readonly updatedAt: Date;
+  readonly updatedTime: Date;
 
   @ApiProperty()
   @IsString()
-  readonly fk_user_site_code: string;
+  readonly siteCode: string;
 }
