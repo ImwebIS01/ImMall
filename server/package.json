@@ -32,6 +32,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "cookie-parser": "^1.4.6",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.1",
     "joi": "^17.6.0",
     "mysql2": "^2.3.3",
@@ -69,7 +70,6 @@
     "typescript": "^4.3.5"
   },
   "jest": {
-    
     "moduleFileExtensions": [
       "js",
       "json",
@@ -89,6 +89,5 @@
       "^src/(.*)$": "<rootDir>/$1"
     },
     "preset": "ts-jest"
-    
   }
 }
