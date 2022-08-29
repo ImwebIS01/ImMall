@@ -25,10 +25,6 @@ export class OrderService {
         site_code,
         user_code,
 
-        updated_time,
-
-        created_time,
-
         delivered_time,
 
         post_number,
@@ -40,9 +36,13 @@ export class OrderService {
         receiver_phone,
 
         receiver_phone2,
+        status,
 
         total_price,
       }: CreateOrderDto = createOrderDto;
+      createOrderDto.created_time = new Date();
+      createOrderDto.updated_time = new Date();
+      console.log(createOrderDto.updated_time);
       return await this.databaseService.query(`
       INSERT INTO testA.order(
         code,
@@ -57,8 +57,6 @@ export class OrderService {
 
         created_time,
 
-        delivered_time,
-
         post_number,
 
         receiver_name,
@@ -68,20 +66,20 @@ export class OrderService {
         receiver_phone,
 
         receiver_phone2,
-
+        status,
         total_price)
         VALUES('${code}',
         '${order_no}',
         '${site_code}',
         '${user_code}',
-        '${updated_time}',
-        '${created_time}',
-        '${delivered_time}',
+        DATE_FORMAT(NOW(), '%Y-%m-%d'),
+        DATE_FORMAT(NOW(), '%Y-%m-%d'),
         '${post_number}',
         '${receiver_name}',
         '${receiver_address}',
         '${receiver_phone}',
         '${receiver_phone2}',
+        '${status}',
         '${total_price}')
         `);
     } catch (error) {
@@ -95,16 +93,25 @@ export class OrderService {
   async getAll(): Promise<any> {
     try {
       const orders = await this.databaseService.query(
-        `SELECT * FROM testA.order ORDER BY created_time DESC`
+        `SELECT * 
+        FROM testA.order 
+        ORDER BY created_time DESC`
       );
       return orders[0];
     } catch (error) {
       throw error;
     }
   }
+
+  /**
+   * 주문 하나 불러오는 함수
+   * @param id 주문 idx 값
+   * @returns 하나값만 불러와줌
+   */
   async getOne(id: number): Promise<CreateOrderDto> {
     try {
-      const order = await this.databaseService.query(` SELECT * 
+      const order = await this.databaseService.query(`
+      SELECT * 
       FROM testA.order 
       WHERE id = ${id};`);
       return order[0][0];

@@ -23,14 +23,14 @@ export class CreateOrderDto {
   @ApiProperty({
     description: '데이터 수정 시간',
   })
-  readonly updated_time: Date;
+  updated_time: Date;
 
   @IsDate()
   @IsNotEmpty()
   @ApiProperty({
     description: '주문 시간',
   })
-  readonly created_time: Date;
+  created_time: Date;
 
   @IsDate()
   @IsNotEmpty()
