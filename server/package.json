@@ -55,6 +55,7 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -69,7 +70,6 @@
     "typescript": "^4.3.5"
   },
   "jest": {
-    
     "moduleFileExtensions": [
       "js",
       "json",
@@ -89,6 +89,5 @@
       "^src/(.*)$": "<rootDir>/$1"
     },
     "preset": "ts-jest"
-    
   }
 }
