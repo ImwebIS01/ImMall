@@ -8,6 +8,7 @@ import { GetMembershipDto } from './dto/get-membership.dto';
 import { MembershipController } from './membership.controller';
 import { MembershipService } from './membership.service';
 import { Memberships } from '../mock-data';
+import { UpdateMembershipDto } from './dto/update-membership.dto';
 
 describe('MembershipController', () => {
   let controller: MembershipController;
@@ -26,7 +27,7 @@ describe('MembershipController', () => {
 
     /** mock-data */
     memberships = Memberships;
-    /** 서비스 로직 구현부 모킹*/
+    /** 서비스 로직 구현부 모킹 함수입니다. */
 
     /** 전체 조회 */
     jest.spyOn(service, 'findAll').mockResolvedValue(memberships);
@@ -42,21 +43,57 @@ describe('MembershipController', () => {
       return result;
     });
 
+    /** 멤버쉽 추가 */
     jest
       .spyOn(service, 'create')
       .mockImplementation(async (createMembershipDto: CreateMembershipDto) => {
-        memberships.push({
-          idx: 4,
-          code: 'test_code_number4',
-          level: 4,
-          point_rage: 4,
-        });
-        if (memberships[3]) {
-          return true;
-        } else {
-          return false;
+        try {
+          memberships.push({
+            idx: 4,
+            code: 'test_code_number4',
+            level: 4,
+            point_rage: 4,
+          });
+          if (memberships[3]) {
+            return true;
+          } else {
+            return false;
+          }
+        } catch (error) {
+          throw error;
         }
       });
+
+    /** 멤버쉽 수정 */
+    jest
+      .spyOn(service, 'update')
+      .mockImplementation(
+        async (code: string, updateMembershipDto: UpdateMembershipDto) => {
+          try {
+            let target;
+            for (let i in memberships) {
+              if (memberships[i].code === code) {
+                memberships[i].level = updateMembershipDto.level
+                  ? updateMembershipDto.level
+                  : memberships[i].level;
+                memberships[i].point_rage = updateMembershipDto.point_rage
+                  ? updateMembershipDto.point_rage
+                  : memberships[i].point_rage;
+                break;
+              }
+            }
+            return true;
+          } catch (error) {
+            throw error;
+          }
+        }
+      );
+
+    /** 멤버쉽 삭제 */
+    jest.spyOn(service, 'remove').mockImplementation(async (code) => {
+      memberships = memberships.filter((v) => v.code !== code);
+      return true;
+    });
   });
 
   it('멤버쉽 컨트롤러 정의', () => {
@@ -90,6 +127,23 @@ describe('MembershipController', () => {
           point_rage: 4,
         })
       ).toBe(true);
+    });
+  });
+
+  describe('멤버쉽 수정', () => {
+    it('멤버쉽 항목이 삭제되어야 함', async () => {
+      expect(
+        await controller.update('test_code_number4', {
+          level: 4,
+          point_rage: 4,
+        })
+      ).toBe(true);
+    });
+  });
+
+  describe('멤버쉽 삭제', () => {
+    it('멤버쉽 항목이 삭제되어야 함', async () => {
+      expect(await controller.remove('test_code_number4')).toBe(true);
     });
   });
 });
