@@ -1,14 +1,11 @@
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as Joi from 'joi';
-import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
-import { GetMembershipDto } from './dto/get-membership.dto';
 import { MembershipController } from './membership.controller';
 import { MembershipService } from './membership.service';
 import { Memberships } from '../mock-data';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
+import { DatabaseModule } from 'src/database/database.module';
 
 describe('MembershipController', () => {
   let controller: MembershipController;
@@ -18,6 +15,7 @@ describe('MembershipController', () => {
   beforeEach(async () => {
     jest.mock('./membership.service');
     const module: TestingModule = await Test.createTestingModule({
+      imports: [DatabaseModule],
       controllers: [MembershipController],
       providers: [MembershipService, DatabaseService],
     }).compile();
