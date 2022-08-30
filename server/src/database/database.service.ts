@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Connection, createConnection, createPool, Pool } from 'mysql2/promise';
 import * as dotenv from 'dotenv';
 import { v4 } from 'uuid';
@@ -7,11 +8,11 @@ import { v4 } from 'uuid';
 export class DatabaseService {
   private connection: Connection;
   private pool: Pool;
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     dotenv.config();
     this.pool = createPool({
       host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
+      port: this.configService.get('DB_PORT'),
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
