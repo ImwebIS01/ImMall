@@ -4,5 +4,5 @@ import { GetMembershipDto } from './get-membership.dto';
 export class CreateMembershipDto extends PickType(GetMembershipDto, [
   'code',
   'level',
-  'pointRage',
+  'point_rage',
 ]) {}

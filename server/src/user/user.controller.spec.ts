@@ -108,12 +108,12 @@ describe('UserController', () => {
       idx: 81,
       code: 'user_code1001',
       passwd: 'password_123',
-      updatedAt: new Date('2022-08-21T17:42:29.000Z'),
+      updatedTime: new Date('2022-08-21T17:42:29.000Z'),
       email: 'user_email1001@imweb.me',
       name: 'user_name1001',
       callNum: '010-1234-5678',
-      createdAt: new Date('2022-08-21T17:42:29.000Z'),
-      fk_user_site_code: null,
+      createdTime: new Date('2022-08-21T17:42:29.000Z'),
+      siteCode: null,
     };
     jest.spyOn(userController, 'getOne').mockImplementation(async () => result);
 
@@ -125,12 +125,12 @@ describe('UserController', () => {
       idx: 81,
       code: 'user_code1001',
       passwd: 'password_123',
-      updatedAt: new Date('2022-08-21T17:42:29.000Z'),
+      updatedTime: new Date('2022-08-21T17:42:29.000Z'),
       email: 'user_email1001@imweb.me',
       name: 'user_name1001',
       callNum: '010-1234-5678',
-      createdAt: new Date('2022-08-21T17:42:29.000Z'),
-      fk_user_site_code: null,
+      createdTime: new Date('2022-08-21T17:42:29.000Z'),
+      siteCode: null,
     };
     const result: GetUserDto = getOneResult;
     jest
@@ -150,12 +150,12 @@ describe('UserController', () => {
       idx: 81,
       code: 'user_code1001',
       passwd: 'password_123',
-      updatedAt: new Date('2022-08-21T17:42:29.000Z'),
+      updatedTime: new Date('2022-08-21T17:42:29.000Z'),
       email: 'user_email1001@imweb.me',
       name: 'user_name1001',
       callNum: '010-1234-5678',
-      createdAt: new Date('2022-08-21T17:42:29.000Z'),
-      fk_user_site_code: null,
+      createdTime: new Date('2022-08-21T17:42:29.000Z'),
+      siteCode: null,
     };
     jest
       .spyOn(userController, 'getOneByCode')
