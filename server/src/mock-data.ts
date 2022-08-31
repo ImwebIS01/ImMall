@@ -1,6 +1,6 @@
 import { GetMembershipDto } from './membership/dto/get-membership.dto';
 
-export const Memberships: Array<Object> = new Array(
+export const Memberships: object[] = [
   {
     idx: 1,
     code: 'test_code_number1',
@@ -18,5 +18,5 @@ export const Memberships: Array<Object> = new Array(
     code: 'test_code_number3',
     level: 3,
     point_rage: 3,
-  }
-);
+  },
+];

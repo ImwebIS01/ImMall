@@ -8,7 +8,6 @@ import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { JwtService } from '@nestjs/jwt';
 import { TokenDto } from './dto/token.dto';
 
-// input-output dto 모두 있어야 함
 @Injectable()
 export class UserService {
   constructor(
@@ -16,6 +15,7 @@ export class UserService {
     private jwtService: JwtService
   ) {}
 
+  /** 회원가입 서비스*/
   async register(createUserDto: CreateUserDto): Promise<GetUserDto> {
     try {
       const salt: string = await bcrypt.genSalt();
@@ -25,8 +25,8 @@ export class UserService {
       ]);
       await this.databaseService.query(`
       INSERT INTO user 
-      (code, name, email, passwd, callNum) 
-      VALUES ("${code}","${createUserDto.name}","${createUserDto.email}", "${hashedPasswd}", "${createUserDto.callNum}");
+      (code, name, email, passwd, callnum, fk_site_code, fk_membership_code) 
+      VALUES ("${code}","${createUserDto.name}","${createUserDto.email}", "${hashedPasswd}", "${createUserDto.callnum}", "${createUserDto.fk_site_code}", "${createUserDto.fk_membership_code}");
       `);
       const data = await this.databaseService.query(`
       SELECT * FROM user WHERE code="${code}";
@@ -61,16 +61,66 @@ export class UserService {
     }
   }
 
-  async getAll(page: number, perPage: number): Promise<GetUserDto[] | object> {
+  async getAll(
+    page: number,
+    perPage: number,
+    site_code?: string
+  ): Promise<GetUserDto[] | object> {
+    const con = await this.databaseService.getConnection();
     try {
+      if (site_code) {
+        const firstOne = (
+          await con.query(`
+        SELECT
+        * 
+        FROM 
+        user 
+        WHERE 
+        fk_site_code="${site_code}"
+        ORDER BY
+        idx ASC
+        LIMIT 1;
+        `)
+        )[0];
+        if (firstOne[0] === undefined) {
+          return [];
+        }
+        const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
+        const usersData: object = (
+          await con.query(`
+        SELECT
+        *
+        FROM user
+        WHERE
+        idx >= ${startIndex} && fk_site_code="${site_code}"
+        ORDER BY
+        idx DESC
+        LIMIT ${perPage};
+        `)
+        )[0];
+        const users: any = usersData;
+        return users;
+      }
       const firstOne = await this.databaseService.query(`
-      SELECT * FROM user ORDER BY idx ASC LIMIT 1`);
+      SELECT 
+      * 
+      FROM 
+      user 
+      ORDER BY idx ASC 
+      LIMIT 1`);
       if (firstOne[0] === undefined) {
         return [];
       }
       const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
       const usersData: object = await this.databaseService.query(`
-      SELECT * FROM user where idx >= ${startIndex} ORDER BY idx DESC LIMIT ${perPage};
+      SELECT 
+      * 
+      FROM 
+      user 
+      WHERE 
+      idx >= ${startIndex} 
+      ORDER BY idx DESC 
+      LIMIT ${perPage};
       `);
       const users: any = usersData;
       return users;
@@ -80,7 +130,7 @@ export class UserService {
     }
   }
 
-  async getOne(idx: number): Promise<GetUserDto> {
+  async getOneByIdx(idx: number): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
           SELECT * 
@@ -93,7 +143,7 @@ export class UserService {
     }
   }
 
-  async getOneByCode(code: string): Promise<GetUserDto> {
+  async getOne(code: string): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
       SELECT * FROM user WHERE code='${code}'
@@ -119,56 +169,64 @@ export class UserService {
     }
   }
 
-  async setOne(idx: number, updateUserDto: UpdateUserDto): Promise<GetUserDto> {
+  async setOne(
+    code: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
       SELECT * 
       FROM user 
-      WHERE idx = ${idx};`);
+      WHERE code = ${code};`);
       const user: GetUserDto = userData[0];
-      console.log(user);
-      const t: Object = { a: 1 };
 
       const name = updateUserDto.name ? updateUserDto.name : user.name;
       const email = updateUserDto.email ? updateUserDto.email : user.email;
       const passwd = updateUserDto.passwd ? updateUserDto.passwd : user.passwd;
-      const callNum = updateUserDto.callNum
-        ? updateUserDto.callNum
-        : user.callNum;
-      var a;
+      const callnum = updateUserDto.callnum
+        ? updateUserDto.callnum
+        : user.callnum;
+      const fk_site_code = updateUserDto.fk_site_code
+        ? updateUserDto.fk_site_code
+        : user.fk_site_code;
+      const fk_membership_code = updateUserDto.fk_membership_code
+        ? updateUserDto.fk_membership_code
+        : user.fk_membership_code;
+
       await this.databaseService.query(`
         UPDATE user
         SET
-        name=IF(${a === undefined}, '${'true'}', '${'false'}'),
+        name='${name}',
         email='${email}',
         passwd='${passwd}',
-        callNum='${callNum}'
-    
-        WHERE idx=${idx};
+        callnum='${callnum}'
+        fk_site_code='${fk_site_code}'
+        fk_membership_code='${fk_membership_code}'
+        WHERE code=${code};
         `);
       const newUserData = await this.databaseService.query(`
             SELECT * 
             FROM user 
-            WHERE idx = ${idx};`);
+            WHERE code = ${code};`);
 
       await this.databaseService.commit();
 
-      const newUser = userData[0];
+      const newUser = newUserData[0];
       return newUser;
     } catch (error) {
       throw error;
     }
   }
 
-  async remove(idx: number): Promise<GetUserDto> {
+  async remove(code: string): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
-      SELECT * FROM user WHERE idx=${idx};
+      SELECT * FROM user WHERE code=${code};
       `);
 
       await this.databaseService.query(`
           DELETE from user
-          WHERE idx=${idx}
+          WHERE code=${code}
           `);
 
       const user: GetUserDto = userData[0];
