@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from '../database/database.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { GetProductDto } from './dto/get-product.dto';
@@ -10,28 +10,25 @@ export class ProductsService {
   constructor(private readonly databaseService: DatabaseService) {}
   async create(createProductDto: CreateProductDto) {
     try {
+      const code = await this.databaseService.genCode();
       const product = await this.databaseService.query(`
           INSERT INTO test2.product 
-          (no,
-            siteCode,
-            code,
-            prodStatus,
-            prodCode,
-            name,
+          (code,
             price,
-            content,
-            simpleContent,
-            imgUrl) 
-          VALUES ('${createProductDto.no}',
-          '${createProductDto.siteCode}',
-          '${createProductDto.code}',
-          '${createProductDto.prodStatus}',
-          '${createProductDto.prodCode}',
-          '${createProductDto.name}',
+            name,
+            prodStatus,
+            stock,
+            image_url,
+            description,
+            site_code) 
+          VALUES ('${code}',
           '${createProductDto.price}',
-          '${createProductDto.content}',
-          '${createProductDto.simpleContent}',
-          '${createProductDto.imgUrl}');
+          '${createProductDto.name}',
+          '${createProductDto.prodStatus}',
+          '${createProductDto.stock}',
+          '${createProductDto.image_url}',
+          '${createProductDto.description}',
+          '${createProductDto.site_code}')
           `);
       return product[0];
     } catch (error) {
@@ -50,10 +47,29 @@ export class ProductsService {
     }
   }
 
-  async findOne(id: number): Promise<GetProductDto> {
+  async findOne(code: string): Promise<GetProductDto> {
+    try {
+      const productData = await this.databaseService.query(`
+      SELECT * FROM test2.product WHERE code='${code}'
+      `);
+      const product: GetProductDto = productData[0];
+      return productData[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findOrderInfo(code: string): Promise<GetProductDto> {
     try {
       const productdata = await this.databaseService.query(`
-      SELECT * FROM test2.product WHERE id = ${id}`);
+      SELECT *
+        from product P
+        inner join order_product OP
+        on P.code = OP.fk_product_code
+        inner join order O
+        on OP.fk_order_code = O.code
+      WHERE P.code = ${code}
+      `);
       const product: GetProductDto = productdata[0];
       return productdata[0];
     } catch (error) {
@@ -61,48 +77,36 @@ export class ProductsService {
     }
   }
 
-  async update(
-    id: number,
-    updateProductDto: UpdateProductDto
-  ): Promise<GetProductDto> {
+  async update(code: string, updateProductDto: UpdateProductDto) {
     try {
       const productData = await this.databaseService.query(`
-      SELECT * FROM test2.product WHERE id = ${id}`);
+      SELECT * FROM test2.product WHERE code = '${code}'`);
       const product: GetProductDto = productData[0];
       const newProduct = await this.databaseService.query(`
     UPDATE test2.product 
     SET 
-    no = IF(${updateProductDto.no != undefined},'${updateProductDto.no}','${
-        product.no
-      }'),
-    siteCode =  IF(${updateProductDto.siteCode != undefined},'${
-        updateProductDto.siteCode
-      }','${product.siteCode}'),
-    code =  IF(${updateProductDto.code != undefined},'${
-        updateProductDto.code
-      }','${product.code}'),
+    price =  IF(${updateProductDto.price != undefined},'${
+        updateProductDto.price
+      }','${product.price}'),
+    name =  IF(${updateProductDto.name != undefined},'${
+        updateProductDto.name
+      }','${product.name}'),
     prodStatus = IF(${updateProductDto.prodStatus != undefined},'${
         updateProductDto.prodStatus
       }','${product.prodStatus}'),
-    prodCode = IF(${updateProductDto.prodCode != undefined},'${
-        updateProductDto.prodCode
-      }','${product.prodCode}'),
-    name = IF(${updateProductDto.name != undefined},'${
-        updateProductDto.name
-      }','${product.name}'),
-    price = IF(${updateProductDto.price != undefined},'${
-        updateProductDto.price
-      }','${product.price}'),
-    content = IF(${updateProductDto.content != undefined},'${
-        updateProductDto.content
-      }','${product.content}'),
-    simpleContent = IF(${updateProductDto.simpleContent != undefined},'${
-        updateProductDto.simpleContent
-      }','${product.simpleContent}'),
-    imgUrl = IF(${updateProductDto.imgUrl != undefined},'${
-        updateProductDto.imgUrl
-      }','${product.imgUrl}')
-    WHERE id=${id};
+    stock = IF(${updateProductDto.stock != undefined},'${
+        updateProductDto.stock
+      }','${product.stock}'),
+    image_url = IF(${updateProductDto.image_url != undefined},'${
+        updateProductDto.image_url
+      }','${product.image_url}'),
+    description = IF(${updateProductDto.description != undefined},'${
+        updateProductDto.description
+      }','${product.description}'),
+    site_code = IF(${updateProductDto.site_code != undefined},'${
+        updateProductDto.site_code
+      }','${product.site_code}')
+    WHERE code='${code}';
     `);
       return newProduct[0];
     } catch (error) {
@@ -110,10 +114,10 @@ export class ProductsService {
     }
   }
 
-  async remove(id: number): Promise<GetProductDto> {
+  async remove(code: string) {
     try {
       const product = await this.databaseService.query(`
-    DELETE FROM test2.product WHERE id=${id};`);
+    DELETE FROM test2.product WHERE code='${code}';`);
       await this.databaseService.commit();
       return product[0];
     } catch (error) {
