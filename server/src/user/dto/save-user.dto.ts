@@ -11,7 +11,7 @@ export class SaveUserDto extends PickType(PartialType(CreateUserDto), [
   'name',
   'email',
   'passwd',
-  'callNum',
+  'callnum',
 ] as const) {
   @IsString()
   @MinLength(4)

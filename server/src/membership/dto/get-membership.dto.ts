@@ -8,4 +8,6 @@ export class GetMembershipDto {
   level: number;
 
   point_rage: number;
+
+  site_code: string;
 }

@@ -8,22 +8,7 @@ export class CreateUserDto extends PickType(PartialType(GetUserDto), [
   'name',
   'email',
   'passwd',
-  'callNum',
-]) {
-  @ApiProperty()
-  @IsString()
-  readonly name: string;
-
-  @ApiProperty()
-  @IsString()
-  readonly email: string;
-
-  @ApiProperty()
-  @IsString()
-  readonly passwd: string;
-
-  @ApiProperty()
-  @IsString()
-  @Optional()
-  readonly callNum: string;
-}
+  'callnum',
+  'fk_site_code',
+  'fk_membership_code',
+]) {}

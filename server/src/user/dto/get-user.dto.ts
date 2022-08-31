@@ -1,11 +1,5 @@
-import {
-  IsDate,
-  IsEmail,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { IsDate, IsEmail, IsNumber, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 /* 유저의 모든 정보를 가져오는 DTO */
 export class GetUserDto {
@@ -22,7 +16,7 @@ export class GetUserDto {
   readonly name: string;
 
   @ApiProperty()
-  @IsString()
+  @IsEmail()
   readonly email: string;
 
   @ApiProperty()
@@ -31,17 +25,21 @@ export class GetUserDto {
 
   @ApiProperty()
   @IsString()
-  readonly callNum: string;
+  readonly callnum: string;
 
   @ApiProperty()
   @IsDate()
-  readonly createdTime: Date;
+  readonly created_time: Date;
 
   @ApiProperty()
   @IsDate()
-  readonly updatedTime: Date;
+  readonly updated_time: Date;
 
   @ApiProperty()
   @IsString()
-  readonly siteCode: string;
+  readonly fk_membership_code: string;
+
+  @ApiProperty()
+  @IsString()
+  fk_site_code: string;
 }
