@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Connection, createConnection, createPool, Pool } from 'mysql2/promise';
-import * as dotenv from 'dotenv';
 import { v4 } from 'uuid';
 
 @Injectable()
 export class DatabaseService {
   private connection: Connection;
   private pool: Pool;
-  constructor() {
-    dotenv.config();
+  constructor(private readonly configService: ConfigService) {
     this.pool = createPool({
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: this.configService.get('DB_HOST'),
+      port: this.configService.get('DB_PORT'),
+      user: this.configService.get('DB_USER'),
+      password: this.configService.get('DB_PASSWORD'),
+      database: this.configService.get('DB_NAME'),
       connectionLimit: 10,
       connectTimeout: 5000,
     });
