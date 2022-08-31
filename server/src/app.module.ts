@@ -15,7 +15,7 @@ Logger.debug(ENV);
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: `.env.${ENV}`,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'stage').required(),
         DB_HOST: Joi.string().required(),
