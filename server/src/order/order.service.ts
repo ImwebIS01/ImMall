@@ -1,11 +1,7 @@
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { DatabaseService } from 'src/database/database.service';
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class OrderService {
@@ -24,9 +20,6 @@ export class OrderService {
 
         site_code,
         user_code,
-
-        delivered_time,
-
         post_number,
 
         receiver_name,
@@ -40,9 +33,6 @@ export class OrderService {
 
         total_price,
       }: CreateOrderDto = createOrderDto;
-      createOrderDto.created_time = new Date();
-      createOrderDto.updated_time = new Date();
-      console.log(createOrderDto.updated_time);
       return await this.databaseService.query(`
       INSERT INTO testA.order(
         code,
@@ -52,10 +42,6 @@ export class OrderService {
         site_code,
 
         user_code,
-
-        updated_time,
-
-        created_time,
 
         post_number,
 
@@ -72,8 +58,6 @@ export class OrderService {
         '${order_no}',
         '${site_code}',
         '${user_code}',
-        DATE_FORMAT(NOW(), '%Y-%m-%d'),
-        DATE_FORMAT(NOW(), '%Y-%m-%d'),
         '${post_number}',
         '${receiver_name}',
         '${receiver_address}',
@@ -105,15 +89,15 @@ export class OrderService {
 
   /**
    * 주문 하나 불러오는 함수
-   * @param id 주문 idx 값
+   * @param idx 주문 idx 값
    * @returns 하나값만 불러와줌
    */
-  async getOne(id: number): Promise<CreateOrderDto> {
+  async getOne(idx: number): Promise<CreateOrderDto> {
     try {
       const order = await this.databaseService.query(`
       SELECT * 
       FROM testA.order 
-      WHERE id = ${id};`);
+      WHERE id = ${idx};`);
       return order[0][0];
     } catch (error) {
       throw error;
@@ -121,12 +105,12 @@ export class OrderService {
   }
   /**
    * 주문 업데이트 함수
-   * @param id 주문 idx 값
+   * @param idx 주문 idx 값
    * @param updateOrderDto
    */
-  async setOne(id: number, updateOrderDto: UpdateOrderDto) {
+  async setOne(idx: number, updateOrderDto: UpdateOrderDto) {
     try {
-      const order: UpdateOrderDto = await this.getOne(id);
+      const order: UpdateOrderDto = await this.getOne(idx);
 
       console.log(updateOrderDto);
 
@@ -184,7 +168,7 @@ export class OrderService {
       receiver_phone='${receiver_phone}',
       receiver_phone2='${receiver_phone2}',
       total_price= '${total_price}'
-      WHERE id=${id};
+      WHERE id=${idx};
       `);
     } catch (error) {
       throw error;
@@ -192,14 +176,14 @@ export class OrderService {
   }
   /**
    * 주문 삭제 함수
-   * @param id idx값으로 찾습니다.
+   * @param idx idx값으로 찾습니다.
    * @returns 리턴값은 없습니다.
    */
-  async remove(id: number) {
+  async remove(idx: number) {
     try {
       await this.databaseService.query(`
       DELETE from testA.order
-      WHERE id=${id}
+      WHERE id=${idx}
       `);
     } catch (error) {
       throw error;
