@@ -23,16 +23,16 @@ export class OrderController {
   findAll() {
     return this.orderService.getAll();
   }
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.getOne(+id);
+  @Get(':idx')
+  findOne(@Param('idx') idx: string) {
+    return this.orderService.getOne(+idx);
   }
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.setOne(+id, updateOrderDto);
+  @Patch(':idx')
+  update(@Param('idx') idx: string, @Body() updateOrderDto: UpdateOrderDto) {
+    return this.orderService.setOne(+idx, updateOrderDto);
   }
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
+  @Delete(':idx')
+  remove(@Param('idx') idx: string) {
+    return this.orderService.remove(+idx);
   }
 }
