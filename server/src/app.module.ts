@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import { ProductsModule } from './products/products.module';
 import { OrderModule } from './order/order.module';
+import { MembershipModule } from './membership/membership.module';
 import * as Joi from 'joi';
 
 const ENV = process.env.NODE_ENV;
@@ -30,6 +31,7 @@ Logger.debug(ENV);
     DatabaseModule,
     OrderModule,
     ProductsModule,
+    MembershipModule,
   ],
   controllers: [AppController],
   providers: [AppService],
