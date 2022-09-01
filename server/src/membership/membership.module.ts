@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MembershipService } from './membership.service';
 import { MembershipController } from './membership.controller';
 import { DatabaseModule } from 'src/database/database.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { DatabaseService } from 'src/database/database.service';
 
@@ -19,6 +19,6 @@ import { DatabaseService } from 'src/database/database.service';
   ],
 
   controllers: [MembershipController],
-  providers: [MembershipService, DatabaseService],
+  providers: [MembershipService, DatabaseService, ConfigService],
 })
 export class MembershipModule {}
