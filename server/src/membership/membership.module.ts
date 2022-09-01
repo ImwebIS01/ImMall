@@ -2,22 +2,11 @@ import { Module } from '@nestjs/common';
 import { MembershipService } from './membership.service';
 import { MembershipController } from './membership.controller';
 import { DatabaseModule } from 'src/database/database.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as Joi from 'joi';
+import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from 'src/database/database.service';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-      validationSchema: Joi.object({
-        JWT_SECRET: Joi.string().required(),
-      }),
-    }),
-  ],
-
+  imports: [DatabaseModule],
   controllers: [MembershipController],
   providers: [MembershipService, DatabaseService, ConfigService],
 })

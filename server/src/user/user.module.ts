@@ -3,22 +3,14 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-import * as Joi from 'joi';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
     DatabaseModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-      validationSchema: Joi.object({
-        JWT_SECRET: Joi.string().required(),
-      }),
-    }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
@@ -29,6 +21,6 @@ import { PassportModule } from '@nestjs/passport';
   ],
   exports: [UserService, JwtStrategy, PassportModule],
   controllers: [UserController],
-  providers: [UserService, DatabaseService, JwtStrategy],
+  providers: [UserService, DatabaseService, JwtStrategy, ConfigService],
 })
 export class UserModule {}
