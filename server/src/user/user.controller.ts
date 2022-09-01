@@ -95,6 +95,7 @@ export class UserController {
     return this.userService.remove(code);
   }
 
+  /** 테이블 전체 행 삭제 */
   @Delete('list/all')
   async removeAll() {
     return this.userService.removeAll();

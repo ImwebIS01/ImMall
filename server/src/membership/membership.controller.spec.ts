@@ -3,10 +3,11 @@ import { DatabaseService } from 'src/database/database.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { MembershipController } from './membership.controller';
 import { MembershipService } from './membership.service';
-import { Memberships } from '../mock-data';
+import { MembershipsMockData } from '../mock-data';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { DatabaseModule } from 'src/database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GetMembershipDto } from './dto/get-membership.dto';
 
 describe('MembershipController', () => {
   let controller: MembershipController;
@@ -25,22 +26,24 @@ describe('MembershipController', () => {
     service = module.get<MembershipService>(MembershipService);
 
     /** mock-data */
-    memberships = Memberships;
+    memberships:GetMembershipDto[] = MembershipsMockData;
     /** 서비스 로직 구현부 모킹 함수입니다. */
 
     /** 전체 조회 */
     jest.spyOn(service, 'findAll').mockResolvedValue(memberships);
 
     /** 단일 조회 */
-    jest.spyOn(service, 'findOne').mockImplementation((code: string) => {
-      let result;
-      memberships.forEach((element) => {
-        if (element.code === code) {
-          result = element;
-        }
+    jest
+      .spyOn(service, 'findOne')
+      .mockImplementation((code: string): Promise<GetMembershipDto> => {
+        let result;
+        memberships.forEach((element) => {
+          if (element.code === code) {
+            result = element;
+          }
+        });
+        return result;
       });
-      return result;
-    });
 
     /** 멤버쉽 추가 */
     jest
