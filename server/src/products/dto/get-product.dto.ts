@@ -37,7 +37,11 @@ export class GetProductDto {
 
   @IsString()
   @IsNotEmpty()
-  readonly site_code: string;
+  readonly category: string;
+
+  @IsString()
+  @IsNotEmpty()
+  fk_site_code: string;
 
   // static of(params: Partial<GetProductDto>): GetProductDto {
   //   const product = new GetProductDto();

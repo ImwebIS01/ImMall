@@ -1,12 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsEmail, IsString } from 'class-validator';
+import { GetUserDto } from './get-user.dto';
 
-export class AuthCredentialDto {
-  @IsEmail()
-  @ApiProperty({ description: '이메일(형식을 맞추어야 함)' })
-  readonly email: string;
-
-  @IsString()
-  @ApiProperty({ description: '비밀번호(4~20자)' })
-  readonly passwd: string;
-}
+export class AuthCredentialDto extends PickType(GetUserDto, [
+  'email',
+  'passwd',
+  'fk_site_code',
+]) {}

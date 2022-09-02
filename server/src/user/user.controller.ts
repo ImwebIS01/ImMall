@@ -24,43 +24,52 @@ import { GetUser } from 'src/custom.decorator';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('sign-up')
-  async signUp(@Body() createUserDto: CreateUserDto) {
+  /** 회원가입 컨트롤러 */
+  @Post('sign-up/:site_code')
+  async signUp(
+    @Param('site_code') site_code: string,
+    @Body() createUserDto: CreateUserDto
+  ) {
+    createUserDto.fk_site_code = site_code;
     return this.userService.register(createUserDto);
   }
 
-  @Post('sign-in')
+  /** 로그인 컨트롤러 */
+  @Post('sign-in/:site_code')
   async signIn(
+    @Param() site_code: string,
     @Body() authCredentialDto: AuthCredentialDto,
     @Res() res: Response
   ) {
-    const { token, expiresIn } = await this.userService.login(
-      authCredentialDto
-    );
+    authCredentialDto.fk_site_code = site_code;
+    const token = await this.userService.login(authCredentialDto);
     return res.cookie('token', token).json(true);
   }
 
-  @Get('test')
-  async test() {
-    return 'test';
-  }
-
+  /** 전체 유저 조회 컨트롤러 */
   @Get()
-  async getAll(@Query() query): Promise<GetUserDto[]> {
+  async getAll(@Query() query): Promise<GetUserDto[] | object> {
     const { page, perPage } = query;
     return this.userService.getAll(+page, +perPage);
   }
 
-  @Get(':idx')
-  async getOne(@Param('idx') idx: number): Promise<GetUserDto> {
-    return this.userService.getOne(+idx);
+  /** 사이트 전체 유저 조회 컨트롤러 */
+  @Get(':site_code')
+  async getAllBySite(
+    @Param('site_code') site_code: string,
+    @Query() query
+  ): Promise<GetUserDto[] | object> {
+    const { page, perPage } = query;
+    return this.userService.getAll(+page, +perPage, site_code);
   }
 
-  @Get('code/:code')
+  /** code로 조회 */
+  @Get(':code')
   async getOneByCode(@Param('code') code: string) {
-    return this.userService.getOneByCode(code);
+    return this.userService.getOne(code);
   }
 
+  /** email로 조회 */
   @Get('email/:email')
   @UseGuards(AuthGuard())
   async getOneByEmail(
@@ -71,16 +80,23 @@ export class UserController {
     throw new UnauthorizedException();
   }
 
-  @Patch(':id')
+  /** code로 수정*/
+  @Patch(':code')
   async update(
-    @Param('id') id: string,
+    @Param('code') code: string,
     @Body() updateUserDto: UpdateUserDto
   ): Promise<GetUserDto> {
-    return this.userService.setOne(+id, updateUserDto);
+    return this.userService.setOne(code, updateUserDto);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<GetUserDto> {
-    return this.userService.remove(+id);
+  /** code로 삭제 */
+  @Delete(':code')
+  async remove(@Param('code') code: string): Promise<GetUserDto> {
+    return this.userService.remove(code);
+  }
+
+  @Delete('list/all')
+  async removeAll() {
+    return this.userService.removeAll();
   }
 }

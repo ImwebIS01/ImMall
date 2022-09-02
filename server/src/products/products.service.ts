@@ -8,6 +8,8 @@ import { object } from 'joi';
 @Injectable()
 export class ProductsService {
   constructor(private readonly databaseService: DatabaseService) {}
+
+  /** 상품 등록 서비스 */
   async create(createProductDto: CreateProductDto) {
     try {
       const code = await this.databaseService.genCode();
@@ -20,7 +22,8 @@ export class ProductsService {
             stock,
             image_url,
             description,
-            site_code) 
+            category,
+            fk_site_code) 
           VALUES ('${code}',
           '${createProductDto.price}',
           '${createProductDto.name}',
@@ -28,7 +31,8 @@ export class ProductsService {
           '${createProductDto.stock}',
           '${createProductDto.image_url}',
           '${createProductDto.description}',
-          '${createProductDto.site_code}')
+          '${createProductDto.category}',
+          '${createProductDto.fk_site_code}')
           `);
       return product[0];
     } catch (error) {
@@ -36,11 +40,74 @@ export class ProductsService {
     }
   }
 
-  async findAll() {
+  async findAll(
+    page: number,
+    perPage: number,
+    site_code: string
+  ): Promise<GetProductDto[] | object> {
+    const con = await this.databaseService.getConnection();
     try {
-      const productData: object = await this.databaseService.query(`
-    SELECT * FROM test2.product;
-    `);
+      const firstOne = (
+        await con.query(`
+    SELECT * FROM test2.product WHERE fk_site_code ='${site_code}' ORDER BY
+    idx ASC
+    LIMIT 1;;
+    `)
+      )[0];
+      if (firstOne[0] === undefined) {
+        return [];
+      }
+      const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
+      const productData: object = (
+        await con.query(`
+      SELECT
+        *
+        FROM test2.product
+        WHERE
+        idx >= ${startIndex} && fk_site_code="${site_code}"
+        ORDER BY
+        idx ASC
+        LIMIT ${perPage};
+        `)
+      )[0];
+      return productData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findAllCategory(
+    page: number,
+    perPage: number,
+    site_code: string,
+    category: string
+  ): Promise<GetProductDto[] | object> {
+    const con = await this.databaseService.getConnection();
+    try {
+      console.log(category);
+      const firstOne = (
+        await con.query(`
+    SELECT * FROM test2.product WHERE fk_site_code ='${site_code}' && category='${category}' ORDER BY
+    idx ASC
+    LIMIT 1;;
+    `)
+      )[0];
+      if (firstOne[0] === undefined) {
+        return [];
+      }
+      const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
+      const productData: object = (
+        await con.query(`
+      SELECT
+        *
+        FROM test2.product
+        WHERE
+        idx >= ${startIndex} && fk_site_code="${site_code}" && category='${category}'
+        ORDER BY
+        idx ASC
+        LIMIT ${perPage};
+        `)
+      )[0];
       return productData;
     } catch (error) {
       throw error;
@@ -103,9 +170,12 @@ export class ProductsService {
     description = IF(${updateProductDto.description != undefined},'${
         updateProductDto.description
       }','${product.description}'),
-    site_code = IF(${updateProductDto.site_code != undefined},'${
-        updateProductDto.site_code
-      }','${product.site_code}')
+      category = IF(${updateProductDto.category != undefined},'${
+        updateProductDto.category
+      }','${product.category}'),
+    site_code = IF(${updateProductDto.fk_site_code != undefined},'${
+        updateProductDto.fk_site_code
+      }','${product.fk_site_code}')
     WHERE code='${code}';
     `);
       return newProduct[0];

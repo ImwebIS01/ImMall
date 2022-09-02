@@ -10,9 +10,10 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "cross-env NODE_ENV=development nest start --watch",
+    "start:stage": "cross-env NODE_ENV=stage nest start --watch",
+    "start:prod": "cross-env NODE_ENV=production node dist/main",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -32,6 +33,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "cookie-parser": "^1.4.6",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.1",
     "joi": "^17.6.0",
     "mysql2": "^2.3.3",
@@ -55,6 +57,7 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -69,7 +72,6 @@
     "typescript": "^4.3.5"
   },
   "jest": {
-    
     "moduleFileExtensions": [
       "js",
       "json",
@@ -89,6 +91,5 @@
       "^src/(.*)$": "<rootDir>/$1"
     },
     "preset": "ts-jest"
-    
   }
 }

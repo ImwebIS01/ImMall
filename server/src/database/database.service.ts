@@ -1,52 +1,67 @@
 import { Injectable } from '@nestjs/common';
-import { Connection, createConnection, createPool, Pool } from 'mysql2/promise';
+import {
+  Connection,
+  createPool,
+  FieldPacket,
+  OkPacket,
+  Pool,
+  PoolConnection,
+  ResultSetHeader,
+  RowDataPacket,
+} from 'mysql2/promise';
 import * as dotenv from 'dotenv';
 import { v4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DatabaseService {
-  private connection: Connection;
   private pool: Pool;
-  constructor() {
-    dotenv.config();
+  constructor(private readonly configService: ConfigService) {
     this.pool = createPool({
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: this.configService.get('DB_HOST'),
+      port: this.configService.get('DB_PORT'),
+      user: this.configService.get('DB_USER'),
+      password: this.configService.get('DB_PASSWORD'),
+      database: this.configService.get('DB_NAME'),
       connectionLimit: 10,
       connectTimeout: 5000,
     });
   }
 
-  async getConnection() {
+  async getConnection(): Promise<PoolConnection> {
     return this.pool.getConnection();
   }
 
-  async query(sql: string) {
-    const conn = await this.pool.getConnection();
-    const data = await conn.query(sql);
+  async query(
+    sql: string
+  ): Promise<
+    | RowDataPacket[]
+    | RowDataPacket[][]
+    | OkPacket
+    | OkPacket[]
+    | ResultSetHeader
+  > {
+    const conn: PoolConnection = await this.pool.getConnection();
+    const data: [
+      (
+        | RowDataPacket[]
+        | RowDataPacket[][]
+        | OkPacket
+        | OkPacket[]
+        | ResultSetHeader
+      ),
+      FieldPacket[]
+    ] = await conn.query(sql);
     conn.release();
     return data[0];
   }
 
-  async release() {
-    const conn = await this.pool.getConnection();
-    return conn.release();
-  }
-
-  async beginTransaction() {
+  async commit(): Promise<void> {
     const con = await this.pool.getConnection();
-    return con.beginTransaction();
+    con.commit();
   }
 
-  async commit() {
-    const con = await this.pool.getConnection();
-    return con.commit();
-  }
-
-  async genCode() {
+  async genCode(): Promise<string> {
     const uuid = () => {
       const tokens = v4().split('-');
       return tokens[2] + tokens[1] + tokens[0] + tokens[3] + tokens[4];
@@ -55,7 +70,7 @@ export class DatabaseService {
     return uuid();
   }
 
-  async end() {
+  async end(): Promise<void> {
     return this.pool.end();
   }
 }

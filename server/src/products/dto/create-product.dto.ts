@@ -9,39 +9,33 @@ export class CreateProductDto extends PickType(PartialType(GetProductDto), [
   'stock',
   'image_url',
   'description',
-  'site_code',
+  'category',
+  'fk_site_code',
 ]) {
-  @IsString()
-  @IsNotEmpty()
-  readonly code: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  readonly price: number;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly prodStatus: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  readonly stock: number;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly image_url: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly description: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly site_code: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly code: string;
+  // @IsNumber()
+  // @IsNotEmpty()
+  // readonly price: number;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly name: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly prodStatus: string;
+  // @IsNumber()
+  // @IsNotEmpty()
+  // readonly stock: number;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly image_url: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly description: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly site_code: string;
 }
 
 // toEntity(): GetProductDto {
