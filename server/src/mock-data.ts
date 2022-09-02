@@ -1,6 +1,6 @@
 import { GetMembershipDto } from './membership/dto/get-membership.dto';
 
-export const MembershipsMockData: object[] = [
+export const MembershipsMockData: GetMembershipDto[] = [
   {
     idx: 1,
     code: 'test_code_number1',

@@ -23,7 +23,7 @@ export class DatabaseService {
       user: this.configService.get('DB_USER'),
       password: this.configService.get('DB_PASSWORD'),
       database: this.configService.get('DB_NAME'),
-      connectionLimit: 10,
+      connectionLimit: 2,
       connectTimeout: 5000,
     });
   }

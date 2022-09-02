@@ -15,7 +15,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
-import { Response } from 'express';
+import { query, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUserDto } from './dto/get-user.dto';
 import { GetUser } from 'src/custom.decorator';
@@ -25,23 +25,20 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   /** 회원가입 컨트롤러 */
-  @Post('sign-up/:site_code')
-  async signUp(
-    @Param('site_code') site_code: string,
-    @Body() createUserDto: CreateUserDto
-  ) {
-    createUserDto.fk_site_code = site_code;
+  @Post('sign-up')
+  async signUp(@Body() createUserDto: CreateUserDto, @Query() query) {
+    createUserDto.fk_site_code = query.site;
     return this.userService.register(createUserDto);
   }
 
   /** 로그인 컨트롤러 */
-  @Post('sign-in/:site_code')
+  @Post('sign-in')
   async signIn(
-    @Param() site_code: string,
+    @Query() query,
     @Body() authCredentialDto: AuthCredentialDto,
     @Res() res: Response
   ) {
-    authCredentialDto.fk_site_code = site_code;
+    authCredentialDto.fk_site_code = query.site;
     const token = await this.userService.login(authCredentialDto);
     return res.cookie('token', token).json(true);
   }
@@ -54,18 +51,15 @@ export class UserController {
   }
 
   /** 사이트 전체 유저 조회 컨트롤러 */
-  @Get(':site_code')
-  async getAllBySite(
-    @Param('site_code') site_code: string,
-    @Query() query
-  ): Promise<GetUserDto[] | object> {
-    const { page, perPage } = query;
-    return this.userService.getAll(+page, +perPage, site_code);
+  @Get()
+  async getAllBySite(@Query() query): Promise<GetUserDto[] | object> {
+    const { page, perPage, site } = query;
+    return this.userService.getAll(+page, +perPage, site);
   }
 
   /** code로 조회 */
   @Get(':code')
-  async getOneByCode(@Param('code') code: string) {
+  async getOneByCode(@Param('code') code: string): Promise<GetUserDto> {
     return this.userService.getOne(code);
   }
 
@@ -93,11 +87,5 @@ export class UserController {
   @Delete(':code')
   async remove(@Param('code') code: string): Promise<GetUserDto> {
     return this.userService.remove(code);
-  }
-
-  /** 테이블 전체 행 삭제 */
-  @Delete('list/all')
-  async removeAll() {
-    return this.userService.removeAll();
   }
 }

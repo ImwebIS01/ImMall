@@ -1,5 +1,3 @@
-import { IsNumber, IsString } from 'class-validator';
-
 export class GetMembershipDto {
   idx: number;
 
@@ -8,6 +6,4 @@ export class GetMembershipDto {
   level: number;
 
   point_rage: number;
-
-  site_code: string;
 }

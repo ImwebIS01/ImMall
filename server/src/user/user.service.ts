@@ -65,7 +65,7 @@ export class UserService {
     page: number,
     perPage: number,
     site_code?: string
-  ): Promise<GetUserDto[] | object> {
+  ): Promise<GetUserDto[]> {
     const con = await this.databaseService.getConnection();
     try {
       if (site_code) {
@@ -99,6 +99,7 @@ export class UserService {
         `)
         )[0];
         const users: any = usersData;
+        con.release();
         return users;
       }
       const firstOne = await this.databaseService.query(`

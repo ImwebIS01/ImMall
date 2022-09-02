@@ -12,7 +12,7 @@ import { GetMembershipDto } from './dto/get-membership.dto';
 describe('MembershipController', () => {
   let controller: MembershipController;
   let service: MembershipService;
-  let memberships;
+  let memberships: GetMembershipDto[];
 
   beforeEach(async () => {
     jest.mock('./membership.service');
@@ -26,7 +26,7 @@ describe('MembershipController', () => {
     service = module.get<MembershipService>(MembershipService);
 
     /** mock-data */
-    memberships:GetMembershipDto[] = MembershipsMockData;
+    memberships = MembershipsMockData;
     /** 서비스 로직 구현부 모킹 함수입니다. */
 
     /** 전체 조회 */
