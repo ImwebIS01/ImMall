@@ -5,39 +5,39 @@ import { ApiProperty } from '@nestjs/swagger';
 export class GetUserDto {
   @ApiProperty()
   @IsNumber()
-  readonly idx: number;
+  idx: number;
 
   @ApiProperty()
   @IsNumber()
-  readonly code: string;
+  code: string;
 
   @ApiProperty()
   @IsString()
-  readonly name: string;
+  name: string;
 
   @ApiProperty()
   @IsEmail()
-  readonly email: string;
+  email: string;
 
   @ApiProperty()
   @IsString()
-  readonly passwd: string;
+  passwd: string;
 
   @ApiProperty()
   @IsString()
-  readonly callnum: string;
+  callnum: string;
 
   @ApiProperty()
   @IsDate()
-  readonly created_time: Date;
+  created_time: Date;
 
   @ApiProperty()
   @IsDate()
-  readonly updated_time: Date;
+  updated_time: Date;
 
   @ApiProperty()
   @IsString()
-  readonly fk_membership_code: string;
+  fk_membership_code: string;
 
   @ApiProperty()
   @IsString()

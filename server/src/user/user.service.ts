@@ -7,6 +7,9 @@ import * as bcrypt from 'bcryptjs';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { JwtService } from '@nestjs/jwt';
 import { TokenDto } from './dto/token.dto';
+import PoolConnection from 'mysql2/typings/mysql/lib/PoolConnection';
+import { RowDataPacket, OkPacket, ResultSetHeader } from 'mysql2';
+import { query } from 'express';
 
 @Injectable()
 export class UserService {
@@ -15,29 +18,28 @@ export class UserService {
     private jwtService: JwtService
   ) {}
 
-  /** 회원가입 서비스*/
-  async register(createUserDto: CreateUserDto): Promise<GetUserDto> {
+  /** 회원가입 */
+  async register(createUserDto: CreateUserDto): Promise<boolean> {
     try {
-      const salt: string = await bcrypt.genSalt();
-      const [hashedPasswd, code] = await Promise.all([
-        bcrypt.hash(createUserDto.passwd, salt),
-        this.databaseService.genCode(),
+      const code = this.databaseService.genCode();
+      const [con, salt] = await Promise.all([
+        this.databaseService.getConnection(),
+        bcrypt.genSalt(),
       ]);
-      await this.databaseService.query(`
+      const hashedPasswd = await bcrypt.hash(createUserDto.passwd, salt);
+      await con.query(`
       INSERT INTO user 
       (code, name, email, passwd, callnum, fk_site_code, fk_membership_code) 
       VALUES ("${code}","${createUserDto.name}","${createUserDto.email}", "${hashedPasswd}", "${createUserDto.callnum}", "${createUserDto.fk_site_code}", "${createUserDto.fk_membership_code}");
       `);
-      const data = await this.databaseService.query(`
-      SELECT * FROM user WHERE code="${code}";
-      `);
-      const user: GetUserDto = data[0];
-      return user;
+      con.release();
+      return true;
     } catch (error) {
       throw error;
     }
   }
 
+  /** 로그인 */
   async login(authCredentialDto: AuthCredentialDto): Promise<TokenDto> {
     try {
       const { email, passwd } = authCredentialDto;
@@ -61,69 +63,39 @@ export class UserService {
     }
   }
 
-  async getAll(
-    page: number,
-    perPage: number,
-    site_code?: string
-  ): Promise<GetUserDto[]> {
+  /** 전체 조회(OFFSET) */
+  async getAllOffset(page: number, perPage: number): Promise<GetUserDto[]> {
     const con = await this.databaseService.getConnection();
     try {
-      if (site_code) {
-        const firstOne = (
-          await con.query(`
-        SELECT
-        * 
-        FROM 
-        user 
-        WHERE 
-        fk_site_code="${site_code}"
-        ORDER BY
-        idx ASC
-        LIMIT 1;
-        `)
-        )[0];
-        if (firstOne[0] === undefined) {
-          return [];
-        }
-        const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
-        const usersData: object = (
-          await con.query(`
-        SELECT
-        *
+      const totalCount: number = (
+        await con.query(`
+      SELECT COUNT(*) AS total_count FROM user;
+      `)
+      )[0][0].total_count;
+      const totalPage: number = Math.ceil(totalCount / perPage);
+      if (totalPage < page) {
+        page = totalPage;
+      }
+      const users: GetUserDto[] = [];
+
+      /** offset 방식*/
+      const usersData:
+        | RowDataPacket[]
+        | RowDataPacket[][]
+        | OkPacket
+        | OkPacket[]
+        | ResultSetHeader = (
+        await con.query(`
+        SELECT * 
         FROM user
-        WHERE
-        idx >= ${startIndex} && fk_site_code="${site_code}"
-        ORDER BY
-        idx DESC
-        LIMIT ${perPage};
-        `)
-        )[0];
-        const users: any = usersData;
-        con.release();
-        return users;
+        LIMIT ${(page - 1) * perPage}, ${perPage};
+      `)
+      )[0];
+
+      for (let i in usersData) {
+        users.push(usersData[i]);
       }
-      const firstOne = await this.databaseService.query(`
-      SELECT 
-      * 
-      FROM 
-      user 
-      ORDER BY idx ASC 
-      LIMIT 1`);
-      if (firstOne[0] === undefined) {
-        return [];
-      }
-      const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
-      const usersData: object = await this.databaseService.query(`
-      SELECT 
-      * 
-      FROM 
-      user 
-      WHERE 
-      idx >= ${startIndex} 
-      ORDER BY idx DESC 
-      LIMIT ${perPage};
-      `);
-      const users: any = usersData;
+      con.release();
       return users;
     } catch (error) {
       console.log(error);
@@ -131,6 +103,137 @@ export class UserService {
     }
   }
 
+  /** 전체 조회(CURSOR)*/
+  async getAllCursor(perPage: number, code: string): Promise<GetUserDto[]> {
+    try {
+      const con = await this.databaseService.getConnection();
+      const cursorIdx = (
+        await con.query(`
+      SELECT * FROM user WHERE code="${code}";
+      `)
+      )[0][0].idx;
+      const userDataByCursor:
+        | RowDataPacket[]
+        | RowDataPacket[][]
+        | OkPacket
+        | OkPacket[]
+        | ResultSetHeader = (
+        await con.query(`
+      SELECT * 
+      FROM user
+      WHERE idx >= "${cursorIdx}"
+      LIMIT ${perPage}
+      ;
+      `)
+      )[0];
+      const users: GetUserDto[] = [];
+      for (let i in userDataByCursor) {
+        users.push(userDataByCursor[i]);
+      }
+      con.release();
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /** 특정 사이트 유저 전체 조회(OFFSET) */
+  async getAllBySiteOffset(
+    page: number,
+    perPage: number,
+    site: string
+  ): Promise<GetUserDto[]> {
+    const con = await this.databaseService.getConnection();
+    try {
+      const totalCount: number = (
+        await con.query(`
+        SELECT COUNT(*) AS total_count FROM user;
+        `)
+      )[0][0].total_count;
+      const totalPage: number = Math.ceil(totalCount / perPage);
+      if (totalPage < page) {
+        page = totalPage;
+      }
+      const users: GetUserDto[] = [];
+
+      /** offset 방식*/
+      const usersData:
+        | RowDataPacket[]
+        | RowDataPacket[][]
+        | OkPacket
+        | OkPacket[]
+        | ResultSetHeader = (
+        await con.query(`
+          SELECT * 
+          FROM user
+          WHERE fk_site_code="${site}"
+          LIMIT ${(page - 1) * perPage}, ${perPage};
+        `)
+      )[0];
+
+      for (let i in usersData) {
+        users.push(usersData[i]);
+      }
+      con.release();
+      return users;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  /** 특정 사이트 유저 전체 조회(CURSOR) */
+  async getAllBySiteCursor(
+    perPage: number,
+    code: string,
+    site: string
+  ): Promise<GetUserDto[]> {
+    try {
+      const con = await this.databaseService.getConnection();
+      const cursorIdx = (
+        await con.query(`
+        SELECT * FROM user WHERE code="${code}";
+        `)
+      )[0][0].idx;
+      const userDataByCursor:
+        | RowDataPacket[]
+        | RowDataPacket[][]
+        | OkPacket
+        | OkPacket[]
+        | ResultSetHeader = (
+        await con.query(`
+        SELECT * 
+        FROM user
+        WHERE idx >= "${cursorIdx}" AND fk_site_code="${site}"
+        LIMIT ${perPage}
+        ;
+        `)
+      )[0];
+      const users: GetUserDto[] = [];
+      for (let i in userDataByCursor) {
+        users.push(userDataByCursor[i]);
+      }
+      con.release();
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /** code로 조회 */
+  async getOne(code: string): Promise<GetUserDto> {
+    try {
+      const userData = await this.databaseService.query(`
+        SELECT * FROM user WHERE code='${code}'
+        `);
+      const user = userData[0];
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /** idx로 조회 */
   async getOneByIdx(idx: number): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
@@ -144,18 +247,7 @@ export class UserService {
     }
   }
 
-  async getOne(code: string): Promise<GetUserDto> {
-    try {
-      const userData = await this.databaseService.query(`
-      SELECT * FROM user WHERE code='${code}'
-      `);
-      const user = userData[0];
-      return user;
-    } catch (error) {
-      throw error;
-    }
-  }
-
+  /** email로 조회 */
   async getOneByEmail(email: string): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
@@ -170,15 +262,16 @@ export class UserService {
     }
   }
 
-  async setOne(
-    code: string,
-    updateUserDto: UpdateUserDto
-  ): Promise<GetUserDto> {
+  /** 유저 업데이트 */
+  async setOne(code: string, updateUserDto: UpdateUserDto): Promise<boolean> {
     try {
-      const userData = await this.databaseService.query(`
+      const con = await this.databaseService.getConnection();
+      const userData = (
+        await con.query(`
       SELECT * 
       FROM user 
-      WHERE code = ${code};`);
+      WHERE code = ${code};`)
+      )[0];
       const user: GetUserDto = userData[0];
 
       const name = updateUserDto.name ? updateUserDto.name : user.name;
@@ -194,7 +287,7 @@ export class UserService {
         ? updateUserDto.fk_membership_code
         : user.fk_membership_code;
 
-      await this.databaseService.query(`
+      await con.query(`
         UPDATE user
         SET
         name='${name}',
@@ -205,50 +298,23 @@ export class UserService {
         fk_membership_code='${fk_membership_code}'
         WHERE code=${code};
         `);
-      const newUserData = await this.databaseService.query(`
-            SELECT * 
-            FROM user 
-            WHERE code = ${code};`);
 
-      await this.databaseService.commit();
-
-      const newUser = newUserData[0];
-      return newUser;
+      con.release();
+      return true;
     } catch (error) {
       throw error;
     }
   }
 
-  async remove(code: string): Promise<GetUserDto> {
+  /** 유저 삭제 */
+  async remove(code: string): Promise<boolean> {
     try {
-      const userData = await this.databaseService.query(`
-      SELECT * FROM user WHERE code=${code};
-      `);
-
       await this.databaseService.query(`
           DELETE from user
           WHERE code=${code}
           `);
-
-      const user: GetUserDto = userData[0];
-
-      return user;
+      return true;
     } catch (error) {
-      throw error;
-    }
-  }
-
-  async removeAll() {
-    try {
-      const connection = await this.databaseService.getConnection();
-      await this.databaseService.query(`
-      TRUNCATE TABLE user;
-      `);
-      return this.databaseService.query(`
-      SELECT * FROM user;
-      `);
-    } catch (error) {
-      console.log(error);
       throw error;
     }
   }

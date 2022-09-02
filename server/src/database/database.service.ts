@@ -9,7 +9,6 @@ import {
   ResultSetHeader,
   RowDataPacket,
 } from 'mysql2/promise';
-import * as dotenv from 'dotenv';
 import { v4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 

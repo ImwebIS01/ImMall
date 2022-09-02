@@ -29,22 +29,6 @@ describe('MembershipController', () => {
     memberships = MembershipsMockData;
     /** 서비스 로직 구현부 모킹 함수입니다. */
 
-    /** 전체 조회 */
-    jest.spyOn(service, 'findAll').mockResolvedValue(memberships);
-
-    /** 단일 조회 */
-    jest
-      .spyOn(service, 'findOne')
-      .mockImplementation((code: string): Promise<GetMembershipDto> => {
-        let result;
-        memberships.forEach((element) => {
-          if (element.code === code) {
-            result = element;
-          }
-        });
-        return result;
-      });
-
     /** 멤버쉽 추가 */
     jest
       .spyOn(service, 'create')
@@ -64,6 +48,22 @@ describe('MembershipController', () => {
         } catch (error) {
           throw error;
         }
+      });
+
+    /** 전체 조회 */
+    jest.spyOn(service, 'findAll').mockResolvedValue(memberships);
+
+    /** 단일 조회 */
+    jest
+      .spyOn(service, 'findOne')
+      .mockImplementation((code: string): Promise<GetMembershipDto> => {
+        let result;
+        memberships.forEach((element) => {
+          if (element.code === code) {
+            result = element;
+          }
+        });
+        return result;
       });
 
     /** 멤버쉽 수정 */
