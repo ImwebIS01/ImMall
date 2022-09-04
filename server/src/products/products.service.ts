@@ -10,7 +10,11 @@ import { OkPacket, ResultSetHeader, RowDataPacket } from 'mysql2';
 export class ProductsService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  /** 상품 등록 */
+  /**
+   * 상품 등록
+   * @param createProductDto
+   * @return boolean 값으로 리턴 'true'/'false'
+   */
   async create(createProductDto: CreateProductDto): Promise<boolean> {
     try {
       const [con, code] = await Promise.all([
@@ -45,7 +49,13 @@ export class ProductsService {
     }
   }
 
-  /** 전체조회 */
+  /**
+   * 전체 조회
+   * @param perPage
+   * @param code
+   * @param site_code
+   * @return GetProductDto[] : 전체 상품의 데이터가 페이지 네이션 된 값
+   */
   async findAll(
     perPage: number,
     code: string,
@@ -80,7 +90,13 @@ export class ProductsService {
     }
   }
 
-  /** 가격순 전체조회 */
+  /**
+   * 가격순 전체조회
+   * @param perPage
+   * @param code
+   * @param site_code
+   * @return GetProductDto[] : 전체 상품의 데이터가 페이지 네이션 된 값(가격순)
+   */
   async findAllPrice(
     perPage: number,
     code: string,
@@ -116,7 +132,14 @@ export class ProductsService {
     }
   }
 
-  /** 카테고리별 조회*/
+  /**
+   * 카테고리별 전체조회
+   * @param perPage
+   * @param code
+   * @param site_code
+   * @param category
+   * @return GetProductDto[] : 카테고리별 데이터가 페이지 네이션 된 값
+   */
   async findAllCategory(
     perPage: number,
     code: string,
@@ -148,7 +171,14 @@ export class ProductsService {
     }
   }
 
-  /** 카테고리별 조회(가격순)*/
+  /**
+   * 카테고리별 조회(가격순)
+   * @param perPage
+   * @param code
+   * @param site_code
+   * @param category
+   * @return GetProductDto[] : 카테고리별 데이터가 페이지 네이션 된 값(가격순)
+   */
   async findAllCategoryPrice(
     perPage: number,
     code: string,
@@ -184,7 +214,11 @@ export class ProductsService {
     }
   }
 
-  /** code로 조회 */
+  /**
+   * code값으로 단일 조회
+   * @param code
+   * @return GetProductDto : code값으로 단일 조회 된 값(가격순)
+   */
   async findOne(code: string): Promise<GetProductDto> {
     try {
       const productData = await this.databaseService.query(`
@@ -197,7 +231,7 @@ export class ProductsService {
     }
   }
 
-  /** Order정보 조회 */
+  /** Order정보 조회(잠깐 보류) */
   async findOrderInfo(code: string): Promise<GetProductDto> {
     try {
       const productdata = await this.databaseService.query(`
@@ -217,6 +251,11 @@ export class ProductsService {
   }
 
   /** 상품정보 업데이트 */
+  /**
+   * 상품정보 업데이트
+   * @param code주문
+   * @param updateOrderDto
+   */
   async update(code: string, updateProductDto: UpdateProductDto) {
     try {
       const productData = await this.databaseService.query(`
@@ -257,7 +296,10 @@ export class ProductsService {
     }
   }
 
-  /** 상품 삭제 */
+  /**
+   * 상품 삭제
+   * @param code
+   */
   async remove(code: string) {
     try {
       const product = await this.databaseService.query(`
