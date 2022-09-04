@@ -1,47 +1,52 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-export class CreateProductDto {
-  @IsNumber()
-  @IsNotEmpty()
-  readonly id: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  readonly no: number;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly siteCode: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly code: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly prodStatus: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly prodCode: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly name: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  readonly price: number;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly content: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly simpleContent: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly imgUrl: string;
+import { GetProductDto } from './get-product.dto';
+export class CreateProductDto extends PickType(PartialType(GetProductDto), [
+  'code',
+  'price',
+  'name',
+  'prodStatus',
+  'stock',
+  'image_url',
+  'description',
+  'category',
+  'fk_site_code',
+]) {
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly code: string;
+  // @IsNumber()
+  // @IsNotEmpty()
+  // readonly price: number;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly name: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly prodStatus: string;
+  // @IsNumber()
+  // @IsNotEmpty()
+  // readonly stock: number;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly image_url: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly description: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // readonly site_code: string;
 }
+
+// toEntity(): GetProductDto {
+//   return GetProductDto.create(
+//     this.code,
+//     this.price,
+//     this.name,
+//     this.prodStatus,
+//     this.stock,
+//     this.image_url,
+//     this.description,
+//     this.site_code
+//   );
+// }
