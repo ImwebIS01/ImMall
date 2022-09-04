@@ -17,22 +17,22 @@ export class OrderController {
 
   @Post('/')
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.register(createOrderDto);
+    return this.orderService.create(createOrderDto);
   }
   @Get('/')
   findAll() {
-    return this.orderService.getAll();
+    return this.orderService.findAll();
   }
-  @Get(':idx')
-  findOne(@Param('idx') idx: string) {
-    return this.orderService.getOne(+idx);
+  @Get(':code')
+  findOne(@Param('code') code: string) {
+    return this.orderService.findOne(code);
   }
-  @Patch(':idx')
-  update(@Param('idx') idx: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.setOne(+idx, updateOrderDto);
+  @Patch(':code')
+  update(@Param('code') code: string, @Body() updateOrderDto: UpdateOrderDto) {
+    return this.orderService.update(code, updateOrderDto);
   }
-  @Delete(':idx')
-  remove(@Param('idx') idx: string) {
-    return this.orderService.remove(+idx);
+  @Delete(':code')
+  remove(@Param('code') code: string) {
+    return this.orderService.remove(code);
   }
 }
