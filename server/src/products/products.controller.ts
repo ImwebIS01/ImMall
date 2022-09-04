@@ -27,34 +27,40 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  // /** 상품등록 컨트롤러 */
-  // @Get()
-  // async findAll(@Query() query): Promise<GetProductDto[] | object> {
-  //   const { page, perPage } = query;
-  //   return this.productsService.findAll(+page, +perPage);
-  // }
-
+  /** 사이트 전체 상품 조회 컨트롤러 */
   @Get(':site_code')
   async getAllBySite(
     @Param('site_code') site_code: string,
     @Query() query
   ): Promise<GetProductDto[] | object> {
-    const { page, perPage } = query;
-    return this.productsService.findAll(+page, +perPage, site_code);
+    const { perPage, code } = query;
+    return this.productsService.findAll(+perPage, code, site_code);
   }
+
+  /** 사이트, 카테고리별 전체 상품 조회 컨트롤러 */
   @Get('category/:site_code')
   async getAllByCategory(
     @Param('site_code') site_code: string,
     @Query() query
   ): Promise<GetProductDto[] | object> {
-    const { page, perPage, category } = query;
+    const { perPage, code, category } = query;
     console.log(category);
     return this.productsService.findAllCategory(
-      +page,
       +perPage,
+      code,
       site_code,
       category
     );
+  }
+
+  /** 사이트 전체 상품 조회(가격순) 컨트롤러 */
+  @Get('price/:site_code')
+  async getAllBySitePrice(
+    @Param('site_code') site_code: string,
+    @Query() query
+  ): Promise<GetProductDto[] | object> {
+    const { perPage, code } = query;
+    return this.productsService.findAllPrice(+perPage, code, site_code);
   }
 
   @Get('code/:code')

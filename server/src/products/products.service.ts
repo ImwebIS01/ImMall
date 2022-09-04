@@ -4,16 +4,20 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { GetProductDto } from './dto/get-product.dto';
 import { object } from 'joi';
+import { OkPacket, ResultSetHeader, RowDataPacket } from 'mysql2';
 
 @Injectable()
 export class ProductsService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  /** 상품 등록 서비스 */
-  async create(createProductDto: CreateProductDto) {
+  /** 상품 등록 */
+  async create(createProductDto: CreateProductDto): Promise<boolean> {
     try {
-      const code = await this.databaseService.genCode();
-      const product = await this.databaseService.query(`
+      const [con, code] = await Promise.all([
+        this.databaseService.getConnection(),
+        this.databaseService.genCode(),
+      ]);
+      await con.query(`
           INSERT INTO test2.product 
           (code,
             price,
@@ -34,86 +38,153 @@ export class ProductsService {
           '${createProductDto.category}',
           '${createProductDto.fk_site_code}')
           `);
-      return product[0];
+      con.release();
+      return true;
     } catch (error) {
       throw error;
     }
   }
 
+  /** 전체조회 */
   async findAll(
-    page: number,
     perPage: number,
+    code: string,
     site_code: string
-  ): Promise<GetProductDto[] | object> {
+  ): Promise<GetProductDto[]> {
+    console.log(code);
     const con = await this.databaseService.getConnection();
     try {
-      const firstOne = (
-        await con.query(`
-    SELECT * FROM test2.product WHERE fk_site_code ='${site_code}' ORDER BY
-    idx ASC
-    LIMIT 1;;
-    `)
-      )[0];
-      if (firstOne[0] === undefined) {
-        return [];
-      }
-      const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
-      const productData: object = (
-        await con.query(`
+      const [row] = await con.query(`
+    SELECT idx FROM test2.product WHERE code = '${code}' &&fk_site_code ='${site_code}'
+    `);
+      const cursorIdx = row[0].idx;
+      const [productData] = await con.query(`
       SELECT
         *
         FROM test2.product
         WHERE
-        idx >= ${startIndex} && fk_site_code="${site_code}"
-        ORDER BY
-        idx ASC
+        idx >= '${cursorIdx}' AND fk_site_code='${site_code}'
         LIMIT ${perPage};
-        `)
-      )[0];
-      return productData;
+        `);
+      console.log(productData);
+      console.log(productData[0]);
+      const products: GetProductDto[] = [];
+      for (const i in productData) {
+        products.push(productData[i]);
+      }
+      console.log(products);
+      con.release();
+      return products;
     } catch (error) {
       throw error;
     }
   }
 
-  async findAllCategory(
-    page: number,
+  /** 가격순 전체조회 */
+  async findAllPrice(
     perPage: number,
+    code: string,
+    site_code: string
+  ): Promise<GetProductDto[]> {
+    const con = await this.databaseService.getConnection();
+    try {
+      const [row] = await con.query(`
+    SELECT idx, price FROM test2.product WHERE code = '${code}' &&fk_site_code ='${site_code}';
+    `);
+      const cursorIdx = row[0].idx;
+      const cursorPrice = row[0].price;
+      const [productData] = await con.query(`
+      SELECT
+        *
+        FROM test2.product
+        WHERE
+        (price >= '${cursorPrice}'AND fk_site_code='${site_code}')
+          OR
+        (price = '${cursorPrice}' AND idx > '${cursorIdx}'AND fk_site_code='${site_code}')
+        ORDER BY price ASC, idx ASC   
+        LIMIT ${perPage};
+        `);
+      console.log(productData);
+      const products: GetProductDto[] = [];
+      for (const i in productData) {
+        products.push(productData[i]);
+      }
+      con.release();
+      return products;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /** 카테고리별 조회*/
+  async findAllCategory(
+    perPage: number,
+    code: string,
     site_code: string,
     category: string
-  ): Promise<GetProductDto[] | object> {
+  ): Promise<GetProductDto[]> {
     const con = await this.databaseService.getConnection();
     try {
-      console.log(category);
-      const firstOne = (
-        await con.query(`
-    SELECT * FROM test2.product WHERE fk_site_code ='${site_code}' && category='${category}' ORDER BY
-    idx ASC
-    LIMIT 1;;
-    `)
-      )[0];
-      if (firstOne[0] === undefined) {
-        return [];
-      }
-      const startIndex: number = perPage * (page - 1) + firstOne[0].idx;
-      const productData: object = (
-        await con.query(`
+      const [row] = await con.query(`
+        SELECT idx FROM test2.product WHERE code = '${code}' && fk_site_code ='${site_code}' && category='${category}';
+    `);
+      const cursorIdx = row[0].idx;
+      const [productData] = await con.query(` 
       SELECT
         *
         FROM test2.product
         WHERE
-        idx >= ${startIndex} && fk_site_code="${site_code}" && category='${category}'
-        ORDER BY
-        idx ASC
+        idx >= ${cursorIdx} && fk_site_code="${site_code}" && category='${category}'
         LIMIT ${perPage};
-        `)
-      )[0];
-      return productData;
+        `);
+      con.release();
+      const products: GetProductDto[] = [];
+      for (const i in productData) {
+        products.push(productData[i]);
+      }
+      return products;
     } catch (error) {
       throw error;
     }
   }
 
+  /** 카테고리별 조회(가격순)*/
+  async findAllCategoryPrice(
+    perPage: number,
+    code: string,
+    site_code: string,
+    category: string
+  ): Promise<GetProductDto[]> {
+    const con = await this.databaseService.getConnection();
+    try {
+      const [row] = await con.query(`
+        SELECT idx, price FROM test2.product WHERE code = '${code}' && fk_site_code ='${site_code}' && category='${category}';
+    `);
+      const cursorIdx = row[0].idx;
+      const cursorPrice = row[0].price;
+      const [productData] = await con.query(` 
+      SELECT
+        *
+        FROM test2.product
+        WHERE
+        (price >= '${cursorPrice}' && fk_site_code="${site_code}" && category='${category}')
+        OR
+        (price = '${cursorPrice}' AND idx > '${cursorIdx}' AND fk_site_code='${site_code}'&& category='${category}')
+        ORDER BY price ASC, idx ASC 
+        LIMIT ${perPage};
+        `);
+      con.release();
+      const products: GetProductDto[] = [];
+      for (const i in productData) {
+        products.push(productData[i]);
+      }
+      return products;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /** code로 조회 */
   async findOne(code: string): Promise<GetProductDto> {
     try {
       const productData = await this.databaseService.query(`
@@ -126,6 +197,7 @@ export class ProductsService {
     }
   }
 
+  /** Order정보 조회 */
   async findOrderInfo(code: string): Promise<GetProductDto> {
     try {
       const productdata = await this.databaseService.query(`
@@ -144,6 +216,7 @@ export class ProductsService {
     }
   }
 
+  /** 상품정보 업데이트 */
   async update(code: string, updateProductDto: UpdateProductDto) {
     try {
       const productData = await this.databaseService.query(`
@@ -184,6 +257,7 @@ export class ProductsService {
     }
   }
 
+  /** 상품 삭제 */
   async remove(code: string) {
     try {
       const product = await this.databaseService.query(`

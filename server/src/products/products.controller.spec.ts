@@ -57,7 +57,7 @@ describe('ProductsController', () => {
     /** 상품 추가 */
     jest
       .spyOn(service, 'create')
-      .mockImplementation(async (createMembershipDto: CreateProductDto) => {
+      .mockImplementation(async (createProductDto: CreateProductDto) => {
         try {
           products.push({
             idx: 4,
