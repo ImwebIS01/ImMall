@@ -9,6 +9,9 @@ import { OrderModule } from './order/order.module';
 import { MembershipModule } from './membership/membership.module';
 import { SiteModule } from './site/site.module';
 import { RefundModule } from './refund/refund.module';
+import { PointsController } from './points/points.controller';
+import { PointsService } from './points/points.service';
+import { PointsModule } from './points/points.module';
 import * as Joi from 'joi';
 
 const ENV = process.env.NODE_ENV;
@@ -36,8 +39,9 @@ Logger.debug(ENV);
     MembershipModule,
     SiteModule,
     RefundModule,
+    PointsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, PointsController],
+  providers: [AppService, PointsService],
 })
 export class AppModule {}
