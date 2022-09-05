@@ -1,7 +1,7 @@
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GetOrderDto } from './dto/get-order.dto';
 
@@ -17,13 +17,18 @@ export class OrderService {
    * @param createOrderDto
    * @returns boolean 값으로 리턴 'true'/'false'
    */
-  async create(createOrderDto: CreateOrderDto): Promise<boolean> {
+  async create(
+    productCode: string,
+    createOrderDto: CreateOrderDto
+  ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
     if (!con) {
       throw new Error();
     }
     try {
-      const code = await this.databaseService.genCode();
+      //트랙잭션 시작
+      await con.beginTransaction();
+      const ordersCode = await this.databaseService.genCode();
       await con.query(`
       INSERT INTO orders(
         code,
@@ -37,7 +42,7 @@ export class OrderService {
         receiver_phone2,
         status,
         total_price)
-        VALUES('${code}',
+        VALUES('${ordersCode}',
         '${createOrderDto.order_no}',
         '${createOrderDto.site_code}',
         '${createOrderDto.user_code}',
@@ -50,10 +55,18 @@ export class OrderService {
         '${createOrderDto.total_price}')
         `);
 
+      const orderProductCode = await this.databaseService.genCode();
+      await con.query(
+        `INSERT INTO order_product(code,fk_order_code,fk_product_code) VALUES('${orderProductCode}','${ordersCode}','${productCode}')`
+      );
+      await con.commit();
       return true;
     } catch (error) {
+      //에러 발생시 롤백
+      await con.rollback();
       throw error;
     } finally {
+      //항상 커넥션 풀 회수
       con.release();
     }
   }

@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -16,8 +17,11 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post('/')
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  create(
+    @Query('productCode') productCode: string,
+    @Body() createOrderDto: CreateOrderDto
+  ) {
+    return this.orderService.create(productCode, createOrderDto);
   }
   @Get('/')
   findAll() {
