@@ -10,12 +10,14 @@ import { TokenDto } from './dto/token.dto';
 import PoolConnection from 'mysql2/typings/mysql/lib/PoolConnection';
 import { RowDataPacket, OkPacket, ResultSetHeader } from 'mysql2';
 import { query } from 'express';
+import { UsefulService } from 'src/useful/useful.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private readonly usefulService: UsefulService
   ) {}
 
   /** 회원가입 */
@@ -76,7 +78,6 @@ export class UserService {
       if (totalPage < page) {
         page = totalPage;
       }
-      const users: GetUserDto[] = [];
 
       /** offset 방식*/
       const usersData:
@@ -91,10 +92,8 @@ export class UserService {
         LIMIT ${(page - 1) * perPage}, ${perPage};
       `)
       )[0];
-
-      for (let i in usersData) {
-        users.push(usersData[i]);
-      }
+      const users: GetUserDto[] =
+        this.usefulService.packitTransformer(usersData);
       con.release();
       return users;
     } catch (error) {
@@ -126,10 +125,8 @@ export class UserService {
       ;
       `)
       )[0];
-      const users: GetUserDto[] = [];
-      for (let i in userDataByCursor) {
-        users.push(userDataByCursor[i]);
-      }
+      const users: GetUserDto[] =
+        this.usefulService.packitTransformer(userDataByCursor);
       con.release();
       return users;
     } catch (error) {
@@ -154,7 +151,6 @@ export class UserService {
       if (totalPage < page) {
         page = totalPage;
       }
-      const users: GetUserDto[] = [];
 
       /** offset 방식*/
       const usersData:
@@ -171,9 +167,8 @@ export class UserService {
         `)
       )[0];
 
-      for (let i in usersData) {
-        users.push(usersData[i]);
-      }
+      const users: GetUserDto[] =
+        this.usefulService.packitTransformer(usersData);
       con.release();
       return users;
     } catch (error) {
@@ -209,10 +204,8 @@ export class UserService {
         ;
         `)
       )[0];
-      const users: GetUserDto[] = [];
-      for (let i in userDataByCursor) {
-        users.push(userDataByCursor[i]);
-      }
+      const users: GetUserDto[] =
+        this.usefulService.packitTransformer(userDataByCursor);
       con.release();
       return users;
     } catch (error) {

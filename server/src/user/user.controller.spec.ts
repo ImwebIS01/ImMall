@@ -57,7 +57,7 @@ describe('UserController', () => {
           fk_membership_code: createUserDto.fk_membership_code,
           fk_site_code: createUserDto.fk_site_code,
         };
-        return newUser;
+        return true;
       });
 
     /** 전체 조회 */
@@ -108,7 +108,7 @@ describe('UserController', () => {
         async (
           code: string,
           updateUserDto: UpdateUserDto
-        ): Promise<GetUserDto> => {
+        ): Promise<boolean> => {
           for (let i in users) {
             if (users[i].code === code) {
               users[i].name = updateUserDto.name
