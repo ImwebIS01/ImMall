@@ -6,37 +6,50 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { RefundService } from './refund.service';
 import { CreateRefundDto } from './dto/create-refund.dto';
 import { UpdateRefundDto } from './dto/update-refund.dto';
+import { GetRefundDto } from './dto/get-refund.dto';
 
 @Controller('refund')
 export class RefundController {
   constructor(private readonly refundService: RefundService) {}
 
-  @Post()
-  create(@Body() createRefundDto: CreateRefundDto) {
+  @Post(':site_code')
+  async create(
+    @Param('site_code') site_code: string,
+    @Body() createRefundDto: CreateRefundDto
+  ) {
+    createRefundDto.fk_site_code = site_code;
     return this.refundService.create(createRefundDto);
   }
 
-  @Get()
-  findAll() {
-    return this.refundService.findAll();
+  @Get(':site_code')
+  async getAllBySite(
+    @Param('site_code') site_code: string,
+    @Query() query
+  ): Promise<GetRefundDto[] | object> {
+    const { perPage, code } = query;
+    return this.refundService.findAll(+perPage, code, site_code);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.refundService.findOne(+id);
+  @Get('code/:code')
+  async findOne(@Param('code') code: string) {
+    return this.refundService.findOne(code);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRefundDto: UpdateRefundDto) {
-    return this.refundService.update(+id, updateRefundDto);
+  @Patch(':code')
+  async update(
+    @Param('code') code: string,
+    @Body() updateRefundDto: UpdateRefundDto
+  ) {
+    return this.refundService.update(code, updateRefundDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.refundService.remove(+id);
+  @Delete(':code')
+  async remove(@Param('code') code: string) {
+    return this.refundService.remove(code);
   }
 }
