@@ -50,7 +50,7 @@ export class ProductsService {
   }
 
   /**
-   * 전체 조회
+   * 상품 전체 조회
    * @param perPage
    * @param code
    * @param site_code
@@ -217,7 +217,7 @@ export class ProductsService {
   /**
    * code값으로 단일 조회
    * @param code
-   * @return GetProductDto : code값으로 단일 조회 된 값(가격순)
+   * @return GetProductDto : code값으로 단일 조회 된 값
    */
   async findOne(code: string): Promise<GetProductDto> {
     try {
@@ -250,7 +250,6 @@ export class ProductsService {
     }
   }
 
-  /** 상품정보 업데이트 */
   /**
    * 상품정보 업데이트
    * @param code주문

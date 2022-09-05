@@ -1,6 +1,5 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { setDefaultResultOrder } from 'dns';
 
 export class GetProductDto {
   @IsNumber()
