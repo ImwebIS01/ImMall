@@ -25,47 +25,58 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   /** 회원가입 컨트롤러 */
-  @Post('sign-up/:site_code')
+  @Post('sign-up')
   async signUp(
-    @Param('site_code') site_code: string,
-    @Body() createUserDto: CreateUserDto
-  ) {
-    createUserDto.fk_site_code = site_code;
+    @Body() createUserDto: CreateUserDto,
+    @Query() query
+  ): Promise<boolean> {
+    createUserDto.fk_site_code = query.site;
     return this.userService.register(createUserDto);
   }
 
   /** 로그인 컨트롤러 */
-  @Post('sign-in/:site_code')
+  @Post('sign-in')
   async signIn(
-    @Param() site_code: string,
+    @Query() query,
     @Body() authCredentialDto: AuthCredentialDto,
     @Res() res: Response
   ) {
-    authCredentialDto.fk_site_code = site_code;
+    authCredentialDto.fk_site_code = query.site;
     const token = await this.userService.login(authCredentialDto);
     return res.cookie('token', token).json(true);
   }
 
-  /** 전체 유저 조회 컨트롤러 */
+  /** Offset 방식, 전체 유저 조회 컨트롤러 */
   @Get()
   async getAll(@Query() query): Promise<GetUserDto[] | object> {
     const { page, perPage } = query;
-    return this.userService.getAll(+page, +perPage);
+    return this.userService.getAllOffset(+page, +perPage);
   }
 
-  /** 사이트 전체 유저 조회 컨트롤러 */
-  @Get(':site_code')
-  async getAllBySite(
-    @Param('site_code') site_code: string,
-    @Query() query
-  ): Promise<GetUserDto[] | object> {
-    const { page, perPage } = query;
-    return this.userService.getAll(+page, +perPage, site_code);
+  /** Cursor 방식, 전체 유저 조회 컨트롤러 */
+  @Get('cursor')
+  async getAllByCursor(@Query() query): Promise<GetUserDto[] | object> {
+    const { perPage, code } = query;
+    return this.userService.getAllCursor(+perPage, code);
+  }
+
+  /** 사이트 전체 유저 조회 컨트롤러(offset) */
+  @Get('site')
+  async getAllBySiteOffset(@Query() query): Promise<GetUserDto[] | object> {
+    const { page, perPage, site } = query;
+    return this.userService.getAllBySiteOffset(+page, +perPage, site);
+  }
+
+  /** 사이트 전체 유저 조회 컨트롤러(cursor) */
+  @Get('site/cursor')
+  async getAllBySiteCursor(@Query() query): Promise<GetUserDto[] | object> {
+    const { perPage, code, site } = query;
+    return this.userService.getAllBySiteOffset(+perPage, code, site);
   }
 
   /** code로 조회 */
   @Get(':code')
-  async getOneByCode(@Param('code') code: string) {
+  async getOneByCode(@Param('code') code: string): Promise<GetUserDto> {
     return this.userService.getOne(code);
   }
 
@@ -85,18 +96,14 @@ export class UserController {
   async update(
     @Param('code') code: string,
     @Body() updateUserDto: UpdateUserDto
-  ): Promise<GetUserDto> {
-    return this.userService.setOne(code, updateUserDto);
+  ): Promise<boolean> {
+    await this.userService.setOne(code, updateUserDto);
+    return true;
   }
 
   /** code로 삭제 */
   @Delete(':code')
-  async remove(@Param('code') code: string): Promise<GetUserDto> {
+  async remove(@Param('code') code: string): Promise<boolean> {
     return this.userService.remove(code);
-  }
-
-  @Delete('list/all')
-  async removeAll() {
-    return this.userService.removeAll();
   }
 }

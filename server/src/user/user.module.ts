@@ -4,16 +4,18 @@ import { UserController } from './user.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
+import { UsefulService } from 'src/useful/useful.service';
 
 @Module({
   imports: [
     DatabaseModule,
+    ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: 'as!daQ213GW$321.AW2s51%Wa',
       signOptions: {
         expiresIn: '1h',
       },
@@ -21,6 +23,12 @@ import { PassportModule } from '@nestjs/passport';
   ],
   exports: [UserService, JwtStrategy, PassportModule],
   controllers: [UserController],
-  providers: [UserService, DatabaseService, JwtStrategy, ConfigService],
+  providers: [
+    UserService,
+    DatabaseService,
+    JwtStrategy,
+    ConfigService,
+    UsefulService,
+  ],
 })
 export class UserModule {}
