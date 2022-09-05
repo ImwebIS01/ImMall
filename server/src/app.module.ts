@@ -8,6 +8,7 @@ import { ProductsModule } from './products/products.module';
 import { OrderModule } from './order/order.module';
 import { MembershipModule } from './membership/membership.module';
 import { SiteModule } from './site/site.module';
+import { RefundModule } from './refund/refund.module';
 import * as Joi from 'joi';
 
 const ENV = process.env.NODE_ENV;
@@ -34,6 +35,7 @@ Logger.debug(ENV);
     ProductsModule,
     MembershipModule,
     SiteModule,
+    RefundModule,
   ],
   controllers: [AppController],
   providers: [AppService],
