@@ -18,11 +18,14 @@ export class OrderService {
    * @returns boolean 값으로 리턴 'true'/'false'
    */
   async create(createOrderDto: CreateOrderDto): Promise<boolean> {
+    const con = await this.databaseService.getConnection();
+    if (!con) {
+      throw new Error();
+    }
     try {
-      const con = await this.databaseService.getConnection();
       const code = await this.databaseService.genCode();
       await con.query(`
-      INSERT INTO ${this.configService.get('DB_NAME')}.order(
+      INSERT INTO orders(
         code,
         order_no,
         site_code,
@@ -46,9 +49,12 @@ export class OrderService {
         '${createOrderDto.status}',
         '${createOrderDto.total_price}')
         `);
+
       return true;
     } catch (error) {
       throw error;
+    } finally {
+      con.release();
     }
   }
   /**
@@ -56,15 +62,20 @@ export class OrderService {
    * @returns 생성일자 기준으로 전체 주문을 배열로 줍니다.
    */
   async findAll(): Promise<any> {
+    const con = await this.databaseService.getConnection();
+    if (!con) {
+      throw new Error();
+    }
     try {
-      const con = await this.databaseService.getConnection();
       const ordersRowData = await con.query(
         `SELECT * 
-        FROM ${this.configService.get('DB_NAME')}.order;`
+        FROM orders;`
       );
       return ordersRowData[0];
     } catch (error) {
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -74,18 +85,20 @@ export class OrderService {
    * @returns 하나값만 불러와줌
    */
   async findOne(code: string): Promise<GetOrderDto> {
+    const con = await this.databaseService.getConnection();
+    if (!con) {
+      throw new Error();
+    }
     try {
-      const con = await this.databaseService.getConnection();
       const orderRowData = await con.query(`
       SELECT * 
-      FROM ${this.configService.get('DB_NAME')}.order 
+      FROM orders 
       WHERE code = "${code}"`);
-      //Promise에서 리턴타입으로 Dto를 검사하고 있는데 다시 검사하는 로직인가용?
-      //제가 잘못 이해한거라면 설명 부탁드립니다!ㅎㅎ
-      //const order: GetOrderDto = orderRowData[0][0]; <<
       return orderRowData[0][0];
     } catch (error) {
       throw error;
+    } finally {
+      con.release();
     }
   }
   /**
@@ -94,8 +107,11 @@ export class OrderService {
    * @param updateOrderDto
    */
   async update(code: string, updateOrderDto: UpdateOrderDto): Promise<boolean> {
+    const con = await this.databaseService.getConnection();
+    if (!con) {
+      throw new Error();
+    }
     try {
-      const con = await this.databaseService.getConnection();
       const existingData = (
         await con.query(`
       SELECT 
@@ -104,9 +120,7 @@ export class OrderService {
       receiver_address,
       receiver_phone,
       receiver_phone2,
-      total_price FROM ${this.configService.get(
-        'DB_NAME'
-      )}.order WHERE code="${code}";
+      total_price FROM orders WHERE code="${code}";
       `)
       )[0][0];
       const post_number = updateOrderDto.post_number
@@ -129,7 +143,7 @@ export class OrderService {
         : existingData.total_price;
 
       await con.query(`
-      UPDATE ${this.configService.get('DB_NAME')}.order
+      UPDATE orders
       SET
       post_number='${post_number}',
       receiver_name='${receiver_name}',
@@ -142,6 +156,8 @@ export class OrderService {
       return true;
     } catch (error) {
       throw error;
+    } finally {
+      con.release();
     }
   }
   /**
@@ -150,15 +166,20 @@ export class OrderService {
    * @returns 리턴값은 없습니다.
    */
   async remove(code: string): Promise<boolean> {
+    const con = await this.databaseService.getConnection();
+    if (!con) {
+      throw new Error();
+    }
     try {
-      const con = await this.databaseService.getConnection();
       await con.query(`
-      DELETE from ${this.configService.get('DB_NAME')}.order
+      DELETE from orders
       WHERE code="${code}";
       `);
       return true;
     } catch (error) {
       throw error;
+    } finally {
+      con.release();
     }
   }
 }
