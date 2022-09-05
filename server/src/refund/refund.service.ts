@@ -19,7 +19,7 @@ export class RefundService {
         this.databaseService.genCode(),
       ]);
       await con.query(`
-          INSERT INTO test2.product 
+          INSERT INTO refunds
           (code,
             amount,
             name,
@@ -56,13 +56,13 @@ export class RefundService {
     const con = await this.databaseService.getConnection();
     try {
       const [row] = await con.query(`
-    SELECT idx FROM test2.refund WHERE code = '${code}' &&fk_site_code ='${site_code}'
+    SELECT idx FROM refunds WHERE code = '${code}' &&fk_site_code ='${site_code}'
     `);
       const cursorIdx = row[0].idx;
       const [refundData] = await con.query(`
       SELECT
         *
-        FROM test2.refund
+        FROM refunds
         WHERE
         idx >= '${cursorIdx}' AND fk_site_code='${site_code}'
         LIMIT ${perPage};
@@ -89,7 +89,7 @@ export class RefundService {
   async findOne(code: string): Promise<GetRefundDto> {
     try {
       const refundData = await this.databaseService.query(`
-      SELECT * FROM test2.refund WHERE code='${code}'
+      SELECT * FROM refunds WHERE code='${code}'
       `);
       const refunds: GetRefundDto = refundData[0];
       return refunds;
@@ -106,10 +106,10 @@ export class RefundService {
   async update(code: string, updateRefundDto: UpdateRefundDto) {
     try {
       const refundData = await this.databaseService.query(`
-      SELECT * FROM test2.product WHERE code = '${code}'`);
+      SELECT * FROM refunds WHERE code = '${code}'`);
       const refund: GetRefundDto = refundData[0];
       const newRefund = await this.databaseService.query(`
-    UPDATE test2.product 
+    UPDATE refunds
     SET 
     price =  IF(${updateRefundDto.amount != undefined},'${
         updateRefundDto.amount
@@ -141,7 +141,7 @@ export class RefundService {
   async remove(code: string) {
     try {
       const refund = await this.databaseService.query(`
-    DELETE FROM test2.refund WHERE code='${code}';`);
+    DELETE FROM refunds WHERE code='${code}';`);
       await this.databaseService.commit();
       return refund[0];
     } catch (error) {
