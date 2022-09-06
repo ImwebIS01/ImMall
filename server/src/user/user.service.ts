@@ -30,7 +30,7 @@ export class UserService {
       ]);
       const hashedPasswd = await bcrypt.hash(createUserDto.passwd, salt);
       await con.query(`
-      INSERT INTO user 
+      INSERT INTO users
       (code, name, email, passwd, callnum, fk_site_code, fk_membership_code) 
       VALUES ("${code}","${createUserDto.name}","${createUserDto.email}", "${hashedPasswd}", "${createUserDto.callnum}", "${createUserDto.fk_site_code}", "${createUserDto.fk_membership_code}");
       `);
@@ -48,7 +48,7 @@ export class UserService {
 
       const userData = await this.databaseService.query(`
           SELECT * 
-          FROM user 
+          FROM users 
           WHERE email = '${email}';
           `);
 
@@ -71,7 +71,7 @@ export class UserService {
     try {
       const totalCount: number = (
         await con.query(`
-      SELECT COUNT(*) AS total_count FROM user;
+      SELECT COUNT(*) AS total_count FROM users;
       `)
       )[0][0].total_count;
       const totalPage: number = Math.ceil(totalCount / perPage);
@@ -88,7 +88,7 @@ export class UserService {
         | ResultSetHeader = (
         await con.query(`
         SELECT * 
-        FROM user
+        FROM users
         LIMIT ${(page - 1) * perPage}, ${perPage};
       `)
       )[0];
@@ -108,7 +108,7 @@ export class UserService {
       const con = await this.databaseService.getConnection();
       const cursorIdx = (
         await con.query(`
-      SELECT * FROM user WHERE code="${code}";
+      SELECT * FROM users WHERE code="${code}";
       `)
       )[0][0].idx;
       const userDataByCursor:
@@ -119,7 +119,7 @@ export class UserService {
         | ResultSetHeader = (
         await con.query(`
       SELECT * 
-      FROM user
+      FROM users
       WHERE idx >= "${cursorIdx}"
       LIMIT ${perPage}
       ;
@@ -144,7 +144,7 @@ export class UserService {
     try {
       const totalCount: number = (
         await con.query(`
-        SELECT COUNT(*) AS total_count FROM user;
+        SELECT COUNT(*) AS total_count FROM users;
         `)
       )[0][0].total_count;
       const totalPage: number = Math.ceil(totalCount / perPage);
@@ -161,7 +161,7 @@ export class UserService {
         | ResultSetHeader = (
         await con.query(`
           SELECT * 
-          FROM user
+          FROM users
           WHERE fk_site_code="${site}"
           LIMIT ${(page - 1) * perPage}, ${perPage};
         `)
@@ -187,7 +187,7 @@ export class UserService {
       const con = await this.databaseService.getConnection();
       const cursorIdx = (
         await con.query(`
-        SELECT * FROM user WHERE code="${code}";
+        SELECT * FROM users WHERE code="${code}";
         `)
       )[0][0].idx;
       const userDataByCursor:
@@ -217,7 +217,7 @@ export class UserService {
   async getOne(code: string): Promise<GetUserDto> {
     try {
       const userData = await this.databaseService.query(`
-        SELECT * FROM user WHERE code='${code}'
+        SELECT * FROM users WHERE code='${code}'
         `);
       const user = userData[0];
       return user;
@@ -231,7 +231,7 @@ export class UserService {
     try {
       const userData = await this.databaseService.query(`
           SELECT * 
-          FROM user 
+          FROM users 
           WHERE idx = ${idx};`);
       const user = userData[0];
       return user;
@@ -245,7 +245,7 @@ export class UserService {
     try {
       const userData = await this.databaseService.query(`
           SELECT * 
-          FROM user 
+          FROM users 
           WHERE email = '${email}';`);
 
       const user = userData[0];
@@ -262,7 +262,7 @@ export class UserService {
       const userData = (
         await con.query(`
       SELECT * 
-      FROM user 
+      FROM users 
       WHERE code = ${code};`)
       )[0];
       const user: GetUserDto = userData[0];
@@ -281,7 +281,7 @@ export class UserService {
         : user.fk_membership_code;
 
       await con.query(`
-        UPDATE user
+        UPDATE users
         SET
         name='${name}',
         email='${email}',
@@ -303,7 +303,7 @@ export class UserService {
   async remove(code: string): Promise<boolean> {
     try {
       await this.databaseService.query(`
-          DELETE from user
+          DELETE from users
           WHERE code=${code}
           `);
       return true;
