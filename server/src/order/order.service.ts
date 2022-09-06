@@ -1,14 +1,14 @@
+import { UsefulService } from 'src/useful/useful.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { GetOrderDto } from './dto/get-order.dto';
 
 @Injectable()
 export class OrderService {
   constructor(
-    private readonly configService: ConfigService,
+    private readonly usefulService: UsefulService,
     private readonly databaseService: DatabaseService
   ) {}
 
@@ -29,6 +29,7 @@ export class OrderService {
       //트랙잭션 시작
       await con.beginTransaction();
       const ordersCode = await this.databaseService.genCode();
+      //오더 생성 쿼리
       await con.query(`
       INSERT INTO orders(
         code,
@@ -56,9 +57,25 @@ export class OrderService {
         `);
 
       const orderProductCode = await this.databaseService.genCode();
+      //oder_product 다대다 연결 데이터 삽입
       await con.query(
         `INSERT INTO order_product(code,fk_order_code,fk_product_code) VALUES('${orderProductCode}','${ordersCode}','${productCode}')`
       );
+      const pointCode = await this.databaseService.genCode();
+      const point = this.usefulService.saveUpPoint(createOrderDto.total_price);
+      //포인트 적립
+      await con.query(
+        `INSERT INTO points(code,fk_user_code,point,expire_date) VALUES('${pointCode}','${
+          createOrderDto.user_code
+        }','${point}','${this.usefulService.expireDatePoint()}')`
+      );
+      const pointAppliedCode = await this.databaseService.genCode();
+      // 포인트 적립 다대다 연결 데이터 삽입
+      await con.query(
+        `INSERT INTO point_applied(code,value,fk_point_code,fk_order_code) VALUES('${pointAppliedCode}','${point}','${pointCode}','${ordersCode}')`
+      );
+
+      //커밋
       await con.commit();
       return true;
     } catch (error) {
