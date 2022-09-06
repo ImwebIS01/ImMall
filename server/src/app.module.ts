@@ -1,3 +1,4 @@
+import { UsefulModule } from './useful/userful.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -11,7 +12,6 @@ import { SiteModule } from './site/site.module';
 import { RefundModule } from './refund/refund.module';
 import { PointsModule } from './points/points.module';
 import * as Joi from 'joi';
-
 const ENV = process.env.NODE_ENV;
 Logger.debug(ENV);
 
@@ -38,6 +38,7 @@ Logger.debug(ENV);
     SiteModule,
     RefundModule,
     PointsModule,
+    UsefulModule,
   ],
   controllers: [AppController],
   providers: [AppService],
