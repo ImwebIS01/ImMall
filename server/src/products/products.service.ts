@@ -22,7 +22,7 @@ export class ProductsService {
         this.databaseService.genCode(),
       ]);
       await con.query(`
-          INSERT INTO test2.product 
+          INSERT INTO products 
           (code,
             price,
             name,
@@ -50,7 +50,7 @@ export class ProductsService {
   }
 
   /**
-   * 전체 조회
+   * 상품 전체 조회
    * @param perPage
    * @param code
    * @param site_code
@@ -65,13 +65,13 @@ export class ProductsService {
     const con = await this.databaseService.getConnection();
     try {
       const [row] = await con.query(`
-    SELECT idx FROM test2.product WHERE code = '${code}' &&fk_site_code ='${site_code}'
+    SELECT idx FROM products WHERE code = '${code}' &&fk_site_code ='${site_code}'
     `);
       const cursorIdx = row[0].idx;
       const [productData] = await con.query(`
       SELECT
         *
-        FROM test2.product
+        FROM products
         WHERE
         idx >= '${cursorIdx}' AND fk_site_code='${site_code}'
         LIMIT ${perPage};
@@ -105,14 +105,14 @@ export class ProductsService {
     const con = await this.databaseService.getConnection();
     try {
       const [row] = await con.query(`
-    SELECT idx, price FROM test2.product WHERE code = '${code}' &&fk_site_code ='${site_code}';
+    SELECT idx, price FROM products WHERE code = '${code}' &&fk_site_code ='${site_code}';
     `);
       const cursorIdx = row[0].idx;
       const cursorPrice = row[0].price;
       const [productData] = await con.query(`
       SELECT
         *
-        FROM test2.product
+        FROM products
         WHERE
         (price >= '${cursorPrice}'AND fk_site_code='${site_code}')
           OR
@@ -149,13 +149,13 @@ export class ProductsService {
     const con = await this.databaseService.getConnection();
     try {
       const [row] = await con.query(`
-        SELECT idx FROM test2.product WHERE code = '${code}' && fk_site_code ='${site_code}' && category='${category}';
+        SELECT idx FROM products WHERE code = '${code}' && fk_site_code ='${site_code}' && category='${category}';
     `);
       const cursorIdx = row[0].idx;
       const [productData] = await con.query(` 
       SELECT
         *
-        FROM test2.product
+        FROM products
         WHERE
         idx >= ${cursorIdx} && fk_site_code="${site_code}" && category='${category}'
         LIMIT ${perPage};
@@ -188,14 +188,14 @@ export class ProductsService {
     const con = await this.databaseService.getConnection();
     try {
       const [row] = await con.query(`
-        SELECT idx, price FROM test2.product WHERE code = '${code}' && fk_site_code ='${site_code}' && category='${category}';
+        SELECT idx, price FROM products WHERE code = '${code}' && fk_site_code ='${site_code}' && category='${category}';
     `);
       const cursorIdx = row[0].idx;
       const cursorPrice = row[0].price;
       const [productData] = await con.query(` 
       SELECT
         *
-        FROM test2.product
+        FROM products
         WHERE
         (price >= '${cursorPrice}' && fk_site_code="${site_code}" && category='${category}')
         OR
@@ -217,12 +217,12 @@ export class ProductsService {
   /**
    * code값으로 단일 조회
    * @param code
-   * @return GetProductDto : code값으로 단일 조회 된 값(가격순)
+   * @return GetProductDto : code값으로 단일 조회 된 값
    */
   async findOne(code: string): Promise<GetProductDto> {
     try {
       const productData = await this.databaseService.query(`
-      SELECT * FROM test2.product WHERE code='${code}'
+      SELECT * FROM products WHERE code='${code}'
       `);
       const product: GetProductDto = productData[0];
       return productData[0];
@@ -236,10 +236,10 @@ export class ProductsService {
     try {
       const productdata = await this.databaseService.query(`
       SELECT *
-        from product P
+        from products P
         inner join order_product OP
         on P.code = OP.fk_product_code
-        inner join order O
+        inner join orders O
         on OP.fk_order_code = O.code
       WHERE P.code = ${code}
       `);
@@ -250,19 +250,18 @@ export class ProductsService {
     }
   }
 
-  /** 상품정보 업데이트 */
   /**
    * 상품정보 업데이트
    * @param code주문
-   * @param updateOrderDto
+   * @param updateProductDto
    */
   async update(code: string, updateProductDto: UpdateProductDto) {
     try {
       const productData = await this.databaseService.query(`
-      SELECT * FROM test2.product WHERE code = '${code}'`);
+      SELECT * FROM products WHERE code = '${code}'`);
       const product: GetProductDto = productData[0];
       const newProduct = await this.databaseService.query(`
-    UPDATE test2.product 
+    UPDATE products 
     SET 
     price =  IF(${updateProductDto.price != undefined},'${
         updateProductDto.price
@@ -303,7 +302,7 @@ export class ProductsService {
   async remove(code: string) {
     try {
       const product = await this.databaseService.query(`
-    DELETE FROM test2.product WHERE code='${code}';`);
+    DELETE FROM products WHERE code='${code}';`);
       await this.databaseService.commit();
       return product[0];
     } catch (error) {
