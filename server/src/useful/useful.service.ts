@@ -19,11 +19,20 @@ export class UsefulService {
     }
     return array;
   }
+  /**
+   * 포인트 계산기
+   * @param price 총합 가격을 넣어주면
+   * @returns 총합가격의 POINT_RATE%로 계산해서 리턴
+   */
   saveUpPoint(price: number) {
     const pointRate = this.configService.get<number>('POINT_RATE');
     const point = price * pointRate;
     return point;
   }
+  /**
+   * 포인트 만료 기간 계산기
+   * @returns 포인트 만료날짜를 현재날짜+POINT_EXPIRE_PLUS_YEAR_DATE 값으로 더해서돌려줌
+   */
   expireDatePoint() {
     const today = new Date();
     const year =
