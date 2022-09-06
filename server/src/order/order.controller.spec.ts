@@ -12,6 +12,7 @@ describe('OrderController', () => {
   let controller: OrderController;
   let service: OrderService;
   let orders;
+  const productCode = 'test';
   beforeEach(async () => {
     jest.mock('./order.service');
     const module: TestingModule = await Test.createTestingModule({
@@ -41,34 +42,36 @@ describe('OrderController', () => {
     /** 오더 추가 */
     jest
       .spyOn(service, 'create')
-      .mockImplementation(async (createOrderDto: CreateOrderDto) => {
-        try {
-          orders.push({
-            idx: 4,
-            code: 'test_code_number4',
-            order_no: 'test4',
-            updated_time: '2022-01-09',
-            created_time: '2022-01-01',
-            delivered_time: '2022-01-10',
-            site_code: 'site_1',
-            user_code: 'user4',
-            post_number: 112,
-            receiver_name: '김테스트4',
-            receiver_address: '서울특별시 테스트구 테스트동',
-            receiver_phone: '01089887777',
-            receiver_phone2: '01077776666',
-            status: '배송중',
-            total_price: 1000,
-          });
-          if (orders[3]) {
-            return true;
-          } else {
-            return false;
+      .mockImplementation(
+        async (productCode, createOrderDto: CreateOrderDto) => {
+          try {
+            orders.push({
+              idx: 4,
+              code: 'test_code_number4',
+              order_no: 'test4',
+              updated_time: '2022-01-09',
+              created_time: '2022-01-01',
+              delivered_time: '2022-01-10',
+              site_code: 'site_1',
+              user_code: 'user4',
+              post_number: 112,
+              receiver_name: '김테스트4',
+              receiver_address: '서울특별시 테스트구 테스트동',
+              receiver_phone: '01089887777',
+              receiver_phone2: '01077776666',
+              status: '배송중',
+              total_price: 1000,
+            });
+            if (orders[3]) {
+              return true;
+            } else {
+              return false;
+            }
+          } catch (error) {
+            throw error;
           }
-        } catch (error) {
-          throw error;
         }
-      });
+      );
 
     /** 오더 수정 */
     jest
@@ -135,7 +138,7 @@ describe('OrderController', () => {
   describe('오더 추가', () => {
     it('오더 항목이 추가되어야 함', async () => {
       expect(
-        await controller.create({
+        await controller.create(productCode, {
           idx: 4,
           code: 'test_code_number4',
           order_no: 'test4',
