@@ -73,7 +73,7 @@ describe('MembershipController', () => {
         async (code: string, updateMembershipDto: UpdateMembershipDto) => {
           try {
             let target;
-            for (let i in memberships) {
+            for (const i in memberships) {
               if (memberships[i].code === code) {
                 memberships[i].level = updateMembershipDto.level
                   ? updateMembershipDto.level
