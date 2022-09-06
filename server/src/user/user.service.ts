@@ -32,7 +32,15 @@ export class UserService {
       await con.query(`
       INSERT INTO users
       (code, name, email, passwd, callnum, fk_site_code, fk_membership_code) 
-      VALUES ("${code}","${createUserDto.name}","${createUserDto.email}", "${hashedPasswd}", "${createUserDto.callnum}", "${createUserDto.fk_site_code}", "${createUserDto.fk_membership_code}");
+      VALUES (
+        "${code}",
+      "${createUserDto.name}",
+      "${createUserDto.email}", 
+      "${hashedPasswd}", 
+      "${createUserDto.callnum}", 
+      "${createUserDto.fk_site_code}", 
+      "${createUserDto.fk_membership_code}"
+      );
       `);
       con.release();
       return true;
