@@ -18,6 +18,8 @@
     "test": "jest",
     "test:user-controller": "jest ./src/user/user.controller.spec.ts",
     "test:membership-controller": "jest ./src/membership/membership.controller.spec.ts",
+    "test:product-controller": "jest ./src/products/products.controller.spec.ts",
+    "test:refund-controller": "jest ./src/refund/refund.controller.spec.ts",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
