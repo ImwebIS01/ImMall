@@ -1,8 +1,12 @@
 import {
+  CACHE_MANAGER,
   Controller,
   Get,
   Header,
+  Inject,
   Param,
+  Post,
+  Query,
   Req,
   Res,
   Response,
@@ -11,13 +15,14 @@ import { AppService } from './app.service';
 import { DatabaseService } from './database/database.service';
 import { MessageProducerService } from './message.producer.service';
 import { MessageConsumer } from './message.consumer';
+import { RedisService } from 'nestjs-redis';
+import { Cache } from 'cache-manager';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly messageProducerService: MessageProducerService,
-    private readonly messageConsumer: MessageConsumer
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   //API WELCOME PAGE
@@ -28,13 +33,31 @@ export class AppController {
   }
 
   @Get('test')
-  push(): boolean {
-    this.messageProducerService.sendMessage('msg');
+  async push(): Promise<boolean> {
     return true;
   }
 
   @Get('consume')
   pop(): boolean {
     return true;
+  }
+  @Get('/cache')
+  async getCache(): Promise<string> {
+    // const savedTime = await this.cacheManager.get<number>('time');
+    // if (savedTime) {
+    //   return 'saved time : ' + savedTime;
+    // }
+    // const now = new Date().getTime();
+    // await this.cacheManager.set<number>('time', now);
+    // return 'save new time : ' + now;
+    console.log(await this.cacheManager.get<string>('immall'));
+
+    return 'as';
+  }
+
+  @Post('')
+  async setRedis(@Query() query) {
+    const { key, value } = query;
+    return this.cacheManager.set<string>(key, value);
   }
 }

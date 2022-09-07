@@ -1,6 +1,6 @@
 import { UsefulModule } from './useful/userful.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Logger, Module } from '@nestjs/common';
+import { CacheModule, Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -12,10 +12,10 @@ import { SiteModule } from './site/site.module';
 import { RefundModule } from './refund/refund.module';
 import { PointsModule } from './points/points.module';
 import { BullModule } from '@nestjs/bull';
-import { RedisModule } from 'nestjs-redis';
 import * as Joi from 'joi';
 import { MessageProducerService } from './message.producer.service';
 import { MessageConsumer } from './message.consumer';
+import * as redisStore from 'cache-manager-ioredis';
 
 const ENV = process.env.NODE_ENV;
 Logger.debug(ENV);
@@ -35,10 +35,15 @@ Logger.debug(ENV);
         JWT_SECRET: Joi.string().required(),
       }),
     }),
+    CacheModule.register({
+      store: redisStore,
+      host: 'localhost',
+      port: 6379,
+    }),
     BullModule.forRoot({
       redis: {
-        host: '3.35.8.76',
-        port: 5003,
+        host: 'localhost',
+        port: 6379,
       },
     }),
     BullModule.registerQueue({
