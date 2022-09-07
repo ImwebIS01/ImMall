@@ -1,4 +1,4 @@
-import { UsefulModule } from './useful/userful.module';
+import { UsefulModule } from './useful/useful.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
