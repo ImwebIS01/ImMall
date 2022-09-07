@@ -1,14 +1,12 @@
-
-import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import * as dotenv from 'dotenv';
-
 
 async function bootstrap() {
-  dotenv.config();
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
   app.use(cookieParser());
   app.enableCors();
   const config = new DocumentBuilder()
@@ -23,14 +21,16 @@ async function bootstrap() {
         name: 'JWT',
         in: 'header',
       },
-      'userToken',
+      'userToken'
     )
     .addTag('ImMall')
     .build();
+  console.log(configService.get('PORT'));
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
-  await app.listen(process.env.PORT)
-  .then(() => console.log(`Listen ${process.env.PORT}`))
-  .catch(err=> console.log(err))
+  await app
+    .listen(configService.get('PORT'))
+    .then(() => console.log(`Listen ${configService.get('PORT')}`))
+    .catch((err) => console.log(err));
 }
 bootstrap();

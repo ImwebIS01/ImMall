@@ -1,30 +1,14 @@
-import {
-    IsEmail,
-    IsOptional,
-    IsString,
-    Matches,
-    MaxLength,
-    MinLength,
-  } from 'class-validator';
-  import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-  
-  export class CreateUserDto {
-    @MinLength(4)
-    @MaxLength(20)
-    @ApiProperty({
-      description: '닉네임(4~20자, 영문 대소문자, 한글, 숫자만 가능)',
-    })
-    readonly username: string;
+import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { Exclude, Expose } from 'class-transformer';
+import { GetUserDto } from './get-user.dto';
+import { Optional } from '@nestjs/common';
 
-    @IsEmail()
-    @ApiProperty({ description: '이메일' })
-    readonly email: string;
-  
-    @IsString()
-    @MinLength(4)
-    @MaxLength(20)
-    @ApiProperty({ description: '비밀번호(4~20자)' })
-    readonly password: string;
-  
-  
-}
+export class CreateUserDto extends PickType(PartialType(GetUserDto), [
+  'name',
+  'email',
+  'passwd',
+  'callnum',
+  'fk_site_code',
+  'fk_membership_code',
+]) {}

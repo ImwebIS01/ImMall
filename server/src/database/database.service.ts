@@ -1,25 +1,85 @@
 import { Injectable } from '@nestjs/common';
-import { Connection, createConnection } from 'mysql2/promise';
-import * as dotenv from 'dotenv';
+import {
+  createPool,
+  FieldPacket,
+  OkPacket,
+  Pool,
+  PoolConnection,
+  ResultSetHeader,
+  RowDataPacket,
+} from 'mysql2/promise';
+import { v4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DatabaseService {
-  private connection: Connection;
-  constructor(){
-    dotenv.config()
-    createConnection({
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
-    }).then((connection)=>{
-      this.connection = connection;
-    }).then(()=>
-    console.log("db connected.."))
+  private pool: Pool;
+  constructor(private readonly configService: ConfigService) {
+    this.pool = createPool({
+      host: this.configService.get('DB_HOST'),
+      port: this.configService.get('DB_PORT'),
+      user: this.configService.get('DB_USER'),
+      password: this.configService.get('DB_PASSWORD'),
+      database: this.configService.get('DB_NAME'),
+      connectionLimit: 2,
+      connectTimeout: 5000,
+    });
   }
 
-  getConnection(){
-    return this.connection;
+  async getConnection(): Promise<PoolConnection> {
+    try {
+      return this.pool.getConnection();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async query(
+    sql: string
+  ): Promise<
+    | RowDataPacket[]
+    | RowDataPacket[][]
+    | OkPacket
+    | OkPacket[]
+    | ResultSetHeader
+  > {
+    try {
+      const conn: PoolConnection = await this.pool.getConnection();
+      const data: [
+        (
+          | RowDataPacket[]
+          | RowDataPacket[][]
+          | OkPacket
+          | OkPacket[]
+          | ResultSetHeader
+        ),
+        FieldPacket[]
+      ] = await conn.query(sql);
+      conn.release();
+      return data[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async genCode(): Promise<string> {
+    try {
+      const uuid = () => {
+        const tokens = v4().split('-');
+        return tokens[2] + tokens[1] + tokens[0] + tokens[3] + tokens[4];
+      };
+
+      return uuid();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async end(): Promise<void> {
+    try {
+      return this.pool.end();
+    } catch (error) {
+      throw error;
+    }
   }
 }
