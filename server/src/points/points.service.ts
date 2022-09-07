@@ -26,6 +26,7 @@ export class PointsService {
       );
       return pointsRowData[0];
     } catch (error) {
+      con.release();
       throw error;
     } finally {
       con.release();
@@ -48,6 +49,7 @@ export class PointsService {
       );
       return pointsRowData[0];
     } catch (error) {
+      con.release();
       throw error;
     } finally {
       con.release();
@@ -71,6 +73,7 @@ export class PointsService {
       WHERE code = "${code}"`);
       return orderRowData[0][0];
     } catch (error) {
+      con.release();
       throw error;
     } finally {
       con.release();
