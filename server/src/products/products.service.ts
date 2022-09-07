@@ -3,12 +3,15 @@ import { DatabaseService } from '../database/database.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { GetProductDto } from './dto/get-product.dto';
-import { object } from 'joi';
-import { OkPacket, ResultSetHeader, RowDataPacket } from 'mysql2';
+import { GetOrderDto } from 'src/order/dto/get-order.dto';
+import { UsefulService } from 'src/useful/useful.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly usefulService: UsefulService
+  ) {}
 
   /**
    * 상품 등록
@@ -16,11 +19,11 @@ export class ProductsService {
    * @return boolean 값으로 리턴 'true'/'false'
    */
   async create(createProductDto: CreateProductDto): Promise<boolean> {
+    const [con, code] = await Promise.all([
+      this.databaseService.getConnection(),
+      this.databaseService.genCode(),
+    ]);
     try {
-      const [con, code] = await Promise.all([
-        this.databaseService.getConnection(),
-        this.databaseService.genCode(),
-      ]);
       await con.query(`
           INSERT INTO products 
           (code,
@@ -42,10 +45,12 @@ export class ProductsService {
           '${createProductDto.category}',
           '${createProductDto.fk_site_code}')
           `);
-      con.release();
       return true;
     } catch (error) {
+      con.release();
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -61,7 +66,6 @@ export class ProductsService {
     code: string,
     site_code: string
   ): Promise<GetProductDto[]> {
-    console.log(code);
     const con = await this.databaseService.getConnection();
     try {
       const [row] = await con.query(`
@@ -78,15 +82,14 @@ export class ProductsService {
         `);
       console.log(productData);
       console.log(productData[0]);
-      const products: GetProductDto[] = [];
-      for (const i in productData) {
-        products.push(productData[i]);
-      }
-      console.log(products);
-      con.release();
+      const products: GetProductDto[] =
+        this.usefulService.packitTransformer(productData);
       return products;
     } catch (error) {
+      con.release();
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -121,14 +124,15 @@ export class ProductsService {
         LIMIT ${perPage};
         `);
       console.log(productData);
-      const products: GetProductDto[] = [];
-      for (const i in productData) {
-        products.push(productData[i]);
-      }
-      con.release();
+      const products: GetProductDto[] =
+        this.usefulService.packitTransformer(productData);
+
       return products;
     } catch (error) {
+      con.release();
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -160,14 +164,14 @@ export class ProductsService {
         idx >= ${cursorIdx} && fk_site_code="${site_code}" && category='${category}'
         LIMIT ${perPage};
         `);
-      con.release();
-      const products: GetProductDto[] = [];
-      for (const i in productData) {
-        products.push(productData[i]);
-      }
+      const products: GetProductDto[] =
+        this.usefulService.packitTransformer(productData);
       return products;
     } catch (error) {
+      con.release();
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -203,14 +207,15 @@ export class ProductsService {
         ORDER BY price ASC, idx ASC 
         LIMIT ${perPage};
         `);
-      con.release();
-      const products: GetProductDto[] = [];
-      for (const i in productData) {
-        products.push(productData[i]);
-      }
+
+      const products: GetProductDto[] =
+        this.usefulService.packitTransformer(productData);
       return products;
     } catch (error) {
+      con.release();
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -233,20 +238,39 @@ export class ProductsService {
 
   /** Order정보 조회(잠깐 보류) */
   async findOrderInfo(code: string): Promise<GetProductDto> {
+    const con = await this.databaseService.getConnection();
     try {
-      const productdata = await this.databaseService.query(`
-      SELECT *
+      const productData = await con.query(`
+      SELECT O.code,
+      O.order_no,
+      O.site_code,
+      O.user_code,
+      O.post_number,
+      O.receiver_name,
+      O.receiver_address,
+      O.receiver_phone,
+      O.receiver_phone2,
+      O.status,
+      O.total_price
         from products P
         inner join order_product OP
         on P.code = OP.fk_product_code
         inner join orders O
         on OP.fk_order_code = O.code
-      WHERE P.code = ${code}
+      WHERE P.code = '${code}'
       `);
-      const product: GetProductDto = productdata[0];
-      return productdata[0];
+
+      // const products: GetOrderDto[] = [];
+      // for (const i in productData) {
+      //   products.push(productData[i]);
+      // }
+      // return products;
+      return productData[0][0];
     } catch (error) {
+      con.release();
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -256,42 +280,54 @@ export class ProductsService {
    * @param updateProductDto
    */
   async update(code: string, updateProductDto: UpdateProductDto) {
+    const con = await this.databaseService.getConnection();
     try {
       const productData = await this.databaseService.query(`
       SELECT * FROM products WHERE code = '${code}'`);
       const product: GetProductDto = productData[0];
-      const newProduct = await this.databaseService.query(`
-    UPDATE products 
-    SET 
-    price =  IF(${updateProductDto.price != undefined},'${
-        updateProductDto.price
-      }','${product.price}'),
-    name =  IF(${updateProductDto.name != undefined},'${
-        updateProductDto.name
-      }','${product.name}'),
-    prodStatus = IF(${updateProductDto.prodStatus != undefined},'${
-        updateProductDto.prodStatus
-      }','${product.prodStatus}'),
-    stock = IF(${updateProductDto.stock != undefined},'${
-        updateProductDto.stock
-      }','${product.stock}'),
-    image_url = IF(${updateProductDto.image_url != undefined},'${
-        updateProductDto.image_url
-      }','${product.image_url}'),
-    description = IF(${updateProductDto.description != undefined},'${
-        updateProductDto.description
-      }','${product.description}'),
-      category = IF(${updateProductDto.category != undefined},'${
-        updateProductDto.category
-      }','${product.category}'),
-    site_code = IF(${updateProductDto.fk_site_code != undefined},'${
-        updateProductDto.fk_site_code
-      }','${product.fk_site_code}')
-    WHERE code='${code}';
-    `);
-      return newProduct[0];
+      const price = updateProductDto.price
+        ? updateProductDto.price
+        : product.price;
+      const name = updateProductDto.name ? updateProductDto.name : product.name;
+      const prodStatus = updateProductDto.prodStatus
+        ? updateProductDto.prodStatus
+        : product.prodStatus;
+      const stock = updateProductDto.stock
+        ? updateProductDto.stock
+        : product.stock;
+      const image_url = updateProductDto.image_url
+        ? updateProductDto.image_url
+        : product.image_url;
+      const description = updateProductDto.description
+        ? updateProductDto.description
+        : product.description;
+      const category = updateProductDto.category
+        ? updateProductDto.category
+        : product.category;
+      const site_code = updateProductDto.fk_site_code
+        ? updateProductDto.fk_site_code
+        : product.fk_site_code;
+
+      await this.databaseService.query(`
+      UPDATE users
+      SET
+      price='${price}',
+      name='${name}',
+      prodStatus='${prodStatus}',
+      stock='${stock}',
+      image_url='${image_url}'
+      description='${description}'
+      category='${category}'
+      site_code=${site_code},
+      WHERE code='${code}';
+      `);
+
+      return true;
     } catch (error) {
+      con.release();
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -301,10 +337,9 @@ export class ProductsService {
    */
   async remove(code: string) {
     try {
-      const product = await this.databaseService.query(`
+      await this.databaseService.query(`
     DELETE FROM products WHERE code='${code}';`);
-      await this.databaseService.commit();
-      return product[0];
+      return true;
     } catch (error) {
       throw error;
     }
