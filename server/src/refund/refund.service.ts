@@ -142,7 +142,6 @@ export class RefundService {
     try {
       const refund = await this.databaseService.query(`
     DELETE FROM refunds WHERE code='${code}';`);
-      await this.databaseService.commit();
       return refund[0];
     } catch (error) {
       throw error;

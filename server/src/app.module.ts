@@ -11,7 +11,12 @@ import { MembershipModule } from './membership/membership.module';
 import { SiteModule } from './site/site.module';
 import { RefundModule } from './refund/refund.module';
 import { PointsModule } from './points/points.module';
+import { BullModule } from '@nestjs/bull';
+import { RedisModule } from 'nestjs-redis';
 import * as Joi from 'joi';
+import { MessageProducerService } from './message.producer.service';
+import { MessageConsumer } from './message.consumer';
+
 const ENV = process.env.NODE_ENV;
 Logger.debug(ENV);
 
@@ -30,6 +35,15 @@ Logger.debug(ENV);
         JWT_SECRET: Joi.string().required(),
       }),
     }),
+    BullModule.forRoot({
+      redis: {
+        host: '3.35.8.76',
+        port: 5003,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'message-queue',
+    }),
     UserModule,
     DatabaseModule,
     OrderModule,
@@ -41,6 +55,6 @@ Logger.debug(ENV);
     UsefulModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MessageProducerService, MessageConsumer],
 })
 export class AppModule {}
