@@ -81,6 +81,7 @@ export class OrderService {
     } catch (error) {
       //에러 발생시 롤백
       await con.rollback();
+      con.release();
       throw error;
     } finally {
       //항상 커넥션 풀 회수
@@ -103,6 +104,7 @@ export class OrderService {
       );
       return ordersRowData[0];
     } catch (error) {
+      con.release();
       throw error;
     } finally {
       con.release();
@@ -126,6 +128,7 @@ export class OrderService {
       WHERE code = "${code}"`);
       return orderRowData[0][0];
     } catch (error) {
+      con.release();
       throw error;
     } finally {
       con.release();
@@ -185,6 +188,7 @@ export class OrderService {
       `);
       return true;
     } catch (error) {
+      con.release();
       throw error;
     } finally {
       con.release();
@@ -207,6 +211,7 @@ export class OrderService {
       `);
       return true;
     } catch (error) {
+      con.release();
       throw error;
     } finally {
       con.release();
