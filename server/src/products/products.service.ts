@@ -303,7 +303,6 @@ export class ProductsService {
     try {
       const product = await this.databaseService.query(`
     DELETE FROM products WHERE code='${code}';`);
-      await this.databaseService.commit();
       return product[0];
     } catch (error) {
       throw error;
