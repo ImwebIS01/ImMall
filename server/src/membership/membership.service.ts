@@ -10,8 +10,8 @@ import { UpdateMembershipDto } from './dto/update-membership.dto';
 export class MembershipService {
   constructor(private readonly databaseService: DatabaseService) {}
   async create(createMembershipDto: CreateMembershipDto) {
+    const con = await this.databaseService.getConnection();
     try {
-      const con = await this.databaseService.getConnection();
       const code = await this.databaseService.genCode();
       await con.query(`
       INSERT INTO membership
@@ -21,6 +21,8 @@ export class MembershipService {
       return true;
     } catch (error) {
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -35,7 +37,7 @@ export class MembershipService {
         )
       )[0];
       const memberships = [];
-      for (let i in membershipsRowData) {
+      for (const i in membershipsRowData) {
         memberships.push(membershipsRowData[i]);
       }
       const getMembershipDtos: GetMembershipDto[] = memberships;

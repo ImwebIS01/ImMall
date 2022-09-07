@@ -2,7 +2,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
-import { config } from 'dotenv';
 import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
 import { UserMockData } from 'src/mock-data';
@@ -61,7 +60,46 @@ describe('UserController', () => {
       });
 
     /** 전체 조회 */
-    jest.spyOn(service, 'getAll').mockResolvedValue(users);
+    jest.spyOn(service, 'getAllOffset').mockResolvedValue(users);
+
+    jest.spyOn(service, 'getAllCursor').mockResolvedValue(users);
+
+    /** 사이트별 조회 */
+    jest
+      .spyOn(service, 'getAllBySiteOffset')
+      .mockImplementation(
+        async (
+          page: number,
+          perPage: number,
+          site: string
+        ): Promise<GetUserDto[]> => {
+          const result = [];
+          for (const i in users) {
+            if (site === users[i].fk_site_code) {
+              result.push(users[i]);
+            }
+          }
+          return result;
+        }
+      );
+
+    jest
+      .spyOn(service, 'getAllBySiteCursor')
+      .mockImplementation(
+        async (
+          perPage: number,
+          code: string,
+          site: string
+        ): Promise<GetUserDto[]> => {
+          const result = [];
+          for (const i in users) {
+            if (site === users[i].fk_site_code) {
+              result.push(users[i]);
+            }
+          }
+          return result;
+        }
+      );
 
     /** 단일 조회(code) */
     jest
@@ -109,7 +147,7 @@ describe('UserController', () => {
           code: string,
           updateUserDto: UpdateUserDto
         ): Promise<boolean> => {
-          for (let i in users) {
+          for (const i in users) {
             if (users[i].code === code) {
               users[i].name = updateUserDto.name
                 ? updateUserDto.name
