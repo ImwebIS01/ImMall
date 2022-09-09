@@ -11,17 +11,13 @@ import PoolConnection from 'mysql2/typings/mysql/lib/PoolConnection';
 import { RowDataPacket, OkPacket, ResultSetHeader } from 'mysql2';
 import { query } from 'express';
 import { UsefulService } from 'src/useful/useful.service';
-import { Queue } from 'bull';
-import { MessageProducerService } from 'src/message.producer.service';
-import { MessageConsumer } from 'src/message.consumer';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly databaseService: DatabaseService,
     private jwtService: JwtService,
-    private readonly usefulService: UsefulService,
-    private readonly messageProducerService: MessageProducerService
+    private readonly usefulService: UsefulService
   ) {}
 
   /** 회원가입 */
@@ -228,10 +224,6 @@ export class UserService {
   /** code로 조회 */
   async getOne(code: string): Promise<GetUserDto> {
     try {
-      const sendJob = await this.messageProducerService.sendMessage(`
-      SELECT * FROM users WHERE code='${code}'
-      `);
-
       const userData = await this.databaseService.query(`
         SELECT * FROM users WHERE code='${code}'
         `);

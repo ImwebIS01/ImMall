@@ -1,17 +1,24 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
-import Bull, { Queue, Job } from 'bull';
+import { Queue, Job } from 'bull';
 
 @Injectable()
 export class MessageProducerService {
   constructor(@InjectQueue('message-queue') private queue: Queue) {}
 
   async sendMessage(message: string) {
-    const job = await this.queue.add('message-job', message);
-    return job;
-  }
+    try {
+      this.queue.on('error', () => {
+        console.log('error');
+      });
+      console.log(this.queue);
 
-  async myFirst() {
-    console.log(this.queue.isReady);
+      const job: Job<any> = await this.queue.add({
+        text: message,
+      });
+      console.log(job);
+    } catch (error) {
+      throw error;
+    }
   }
 }

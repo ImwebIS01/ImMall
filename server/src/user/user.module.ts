@@ -8,9 +8,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { UsefulService } from 'src/useful/useful.service';
-import { MessageProducerService } from 'src/message.producer.service';
-import { BullModule } from '@nestjs/bull';
-import { MessageConsumer } from 'src/message.consumer';
 
 @Module({
   imports: [
@@ -23,15 +20,6 @@ import { MessageConsumer } from 'src/message.consumer';
         expiresIn: '1h',
       },
     }),
-    BullModule.forRoot({
-      redis: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
-    BullModule.registerQueue({
-      name: 'message-queue',
-    }),
   ],
   exports: [UserService, JwtStrategy, PassportModule],
   controllers: [UserController],
@@ -41,7 +29,6 @@ import { MessageConsumer } from 'src/message.consumer';
     JwtStrategy,
     ConfigService,
     UsefulService,
-    MessageProducerService,
   ],
 })
 export class UserModule {}
