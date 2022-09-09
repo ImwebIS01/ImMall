@@ -5,11 +5,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
 import { UserMockData } from 'src/mock-data';
+import { UsefulService } from 'src/useful/useful.service';
+import { UsefulModule } from 'src/useful/userful.module';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserController } from './user.controller';
+import { UserModule } from './user.module';
 import { UserService } from './user.service';
 
 describe('UserController', () => {
@@ -26,10 +29,18 @@ describe('UserController', () => {
         ConfigModule,
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule,
+        UserModule,
+        UsefulModule,
       ],
       exports: [UserService, JwtStrategy, PassportModule],
       controllers: [UserController],
-      providers: [UserService, DatabaseService, JwtStrategy, ConfigService],
+      providers: [
+        UserService,
+        DatabaseService,
+        JwtStrategy,
+        ConfigService,
+        UsefulService,
+      ],
     }).compile();
 
     controller = module.get<UserController>(UserController);
@@ -40,7 +51,7 @@ describe('UserController', () => {
 
     /** 서비스 로직 구현부 모킹함수 입니다.  */
 
-    /** 멤버쉽 추가 */
+    /** 회원가입 */
     jest
       .spyOn(service, 'register')
       .mockImplementation(async (createUserDto: CreateUserDto) => {

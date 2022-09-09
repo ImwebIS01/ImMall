@@ -23,8 +23,7 @@ describe('UserService', () => {
     dbService = module.get<DatabaseService>(DatabaseService);
 
     users = UserMockData;
-    jest.spyOn(dbService, 'getConnection').mockReturnValue();
-  });
+
 
   it('should be defined', () => {
     expect(service).toBeDefined();
