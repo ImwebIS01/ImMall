@@ -8,6 +8,7 @@ import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { DatabaseModule } from 'src/database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GetMembershipDto } from './dto/get-membership.dto';
+import * as Joi from 'joi';
 
 describe('MembershipController', () => {
   let controller: MembershipController;
@@ -17,7 +18,21 @@ describe('MembershipController', () => {
   beforeEach(async () => {
     jest.mock('./membership.service');
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, ConfigModule],
+      imports: [
+        DatabaseModule,
+        ConfigModule.forRoot({
+          isGlobal: false,
+          envFilePath: `src/config/env/.test.env`,
+          validationSchema: Joi.object({
+            DB_HOST: Joi.string().required(),
+            DB_PORT: Joi.string().required(),
+            DB_USER: Joi.string().required(),
+            DB_PASSWORD: Joi.string().required(),
+            DB_NAME: Joi.string().required(),
+            JWT_SECRET: Joi.string().required(),
+          }),
+        }),
+      ],
       controllers: [MembershipController],
       providers: [MembershipService, DatabaseService, ConfigService],
     }).compile();

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FieldPacket } from 'mysql2';
 import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
+import { MessageProducerService } from 'src/message.producer.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { GetMembershipDto } from './dto/get-membership.dto';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
@@ -10,17 +11,19 @@ import { UpdateMembershipDto } from './dto/update-membership.dto';
 export class MembershipService {
   constructor(private readonly databaseService: DatabaseService) {}
   async create(createMembershipDto: CreateMembershipDto) {
+    const con = await this.databaseService.getConnection();
     try {
-      const con = await this.databaseService.getConnection();
       const code = await this.databaseService.genCode();
       await con.query(`
-      INSERT INTO membership
+      INSERT INTO memberships
       (code, level, point_rage)
       VALUES ("${code}", "${createMembershipDto.level}", "${createMembershipDto.point_rage}");
       `);
       return true;
     } catch (error) {
       throw error;
+    } finally {
+      con.release();
     }
   }
 
@@ -30,12 +33,12 @@ export class MembershipService {
       const membershipsRowData = (
         await con.query(
           `
-      select * from membership;
+      select * from memberships;
       `
         )
       )[0];
       const memberships = [];
-      for (let i in membershipsRowData) {
+      for (const i in membershipsRowData) {
         memberships.push(membershipsRowData[i]);
       }
       const getMembershipDtos: GetMembershipDto[] = memberships;
@@ -51,7 +54,7 @@ export class MembershipService {
       const con = await this.databaseService.getConnection();
       const membershipRowData = (
         await con.query(`
-      select * from membership where code="${code}";
+      select * from memberships where code="${code}";
       `)
       )[0];
       const membership: GetMembershipDto = membershipRowData[0];
@@ -66,7 +69,7 @@ export class MembershipService {
       const con = await this.databaseService.getConnection();
       const existingData = (
         await con.query(`
-      SELECT level, point_rage FROM membership WHERE code="${code}";
+      SELECT level, point_rage FROM memberships WHERE code="${code}";
       `)
       )[0][0];
       console.log(existingData);
@@ -78,7 +81,7 @@ export class MembershipService {
         : existingData.point_rage;
 
       await con.query(`
-      UPDATE membership
+      UPDATE memberships
       SET
       level="${level}",
       point_rage="${point_rage}"
@@ -96,7 +99,7 @@ export class MembershipService {
       const con = await this.databaseService.getConnection();
       con.query(
         `
-      DELETE from membership
+      DELETE from memberships
       WHERE code="${code}";
       `
       );

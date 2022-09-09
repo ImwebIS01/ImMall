@@ -2,15 +2,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
-import { config } from 'dotenv';
 import { DatabaseModule } from 'src/database/database.module';
 import { DatabaseService } from 'src/database/database.service';
 import { UserMockData } from 'src/mock-data';
+import { UsefulService } from 'src/useful/useful.service';
+import { UsefulModule } from 'src/useful/userful.module';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserController } from './user.controller';
+import { UserModule } from './user.module';
 import { UserService } from './user.service';
 
 describe('UserController', () => {
@@ -27,10 +29,18 @@ describe('UserController', () => {
         ConfigModule,
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule,
+        UserModule,
+        UsefulModule,
       ],
       exports: [UserService, JwtStrategy, PassportModule],
       controllers: [UserController],
-      providers: [UserService, DatabaseService, JwtStrategy, ConfigService],
+      providers: [
+        UserService,
+        DatabaseService,
+        JwtStrategy,
+        ConfigService,
+        UsefulService,
+      ],
     }).compile();
 
     controller = module.get<UserController>(UserController);
@@ -41,7 +51,7 @@ describe('UserController', () => {
 
     /** 서비스 로직 구현부 모킹함수 입니다.  */
 
-    /** 멤버쉽 추가 */
+    /** 회원가입 */
     jest
       .spyOn(service, 'register')
       .mockImplementation(async (createUserDto: CreateUserDto) => {
@@ -61,7 +71,46 @@ describe('UserController', () => {
       });
 
     /** 전체 조회 */
-    jest.spyOn(service, 'getAll').mockResolvedValue(users);
+    jest.spyOn(service, 'getAllOffset').mockResolvedValue(users);
+
+    jest.spyOn(service, 'getAllCursor').mockResolvedValue(users);
+
+    /** 사이트별 조회 */
+    jest
+      .spyOn(service, 'getAllBySiteOffset')
+      .mockImplementation(
+        async (
+          page: number,
+          perPage: number,
+          site: string
+        ): Promise<GetUserDto[]> => {
+          const result = [];
+          for (const i in users) {
+            if (site === users[i].fk_site_code) {
+              result.push(users[i]);
+            }
+          }
+          return result;
+        }
+      );
+
+    jest
+      .spyOn(service, 'getAllBySiteCursor')
+      .mockImplementation(
+        async (
+          perPage: number,
+          code: string,
+          site: string
+        ): Promise<GetUserDto[]> => {
+          const result = [];
+          for (const i in users) {
+            if (site === users[i].fk_site_code) {
+              result.push(users[i]);
+            }
+          }
+          return result;
+        }
+      );
 
     /** 단일 조회(code) */
     jest
@@ -109,7 +158,7 @@ describe('UserController', () => {
           code: string,
           updateUserDto: UpdateUserDto
         ): Promise<boolean> => {
-          for (let i in users) {
+          for (const i in users) {
             if (users[i].code === code) {
               users[i].name = updateUserDto.name
                 ? updateUserDto.name

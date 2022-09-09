@@ -6,12 +6,14 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { LoggingInterceptor } from './util/logging.interceptor';
 import { TransformInterceptor } from './util/transform.interceptor';
 import * as cookieParser from 'cookie-parser';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   app.use(cookieParser());
   app.enableCors();
+  app.useWebSocketAdapter(new WsAdapter(app));
   const config = new DocumentBuilder()
     .setTitle('ImMall')
     .setDescription('ImMall API Description')
