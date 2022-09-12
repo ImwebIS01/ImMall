@@ -43,13 +43,13 @@ export class CreateOrderDto {
   @ApiProperty({
     description: '주문한 사이트 코드 ',
   })
-  readonly site_code: string;
+  fk_site_code: string;
 
   @IsNotEmpty()
   @ApiProperty({
     description: '주문한 유저 코드 ',
   })
-  readonly user_code: string;
+  readonly fk_user_code: string;
 
   @IsNotEmpty()
   @ApiProperty({

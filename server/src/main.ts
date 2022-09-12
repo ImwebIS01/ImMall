@@ -38,7 +38,7 @@ async function bootstrap() {
   );
   await app
     .listen(configService.get('PORT'))
-    .then(() => Logger.log(`Listen ${configService.get('PORT')}`))
+    .then(() => Logger.log(`Listen ${configService.get('PORT')}`, 'Server'))
     .catch((err) => Logger.error(err));
 }
 bootstrap();
