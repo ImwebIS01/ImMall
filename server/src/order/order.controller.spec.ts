@@ -13,6 +13,8 @@ describe('OrderController', () => {
   let service: OrderService;
   let orders;
   const productCode = 'test';
+  const count = 3;
+  const fk_site_code = 'site1';
   beforeEach(async () => {
     jest.mock('./order.service');
     const module: TestingModule = await Test.createTestingModule({
@@ -43,7 +45,7 @@ describe('OrderController', () => {
     jest
       .spyOn(service, 'create')
       .mockImplementation(
-        async (productCode, createOrderDto: CreateOrderDto) => {
+        async (productCode, count, createOrderDto: CreateOrderDto) => {
           try {
             orders.push({
               idx: 4,
@@ -52,8 +54,8 @@ describe('OrderController', () => {
               updated_time: '2022-01-09',
               created_time: '2022-01-01',
               delivered_time: '2022-01-10',
-              site_code: 'site_1',
-              user_code: 'user4',
+              fk_site_code: 'site_1',
+              fk_user_code: 'user4',
               post_number: 112,
               receiver_name: '김테스트4',
               receiver_address: '서울특별시 테스트구 테스트동',
@@ -138,15 +140,15 @@ describe('OrderController', () => {
   describe('오더 추가', () => {
     it('오더 항목이 추가되어야 함', async () => {
       expect(
-        await controller.create(productCode, {
+        await controller.create(fk_site_code, productCode, count, {
           idx: 4,
           code: 'test_code_number4',
           order_no: 'test4',
           updated_time: '2022-01-09',
           created_time: '2022-01-01',
           delivered_time: '2022-01-10',
-          site_code: 'site_1',
-          user_code: 'user4',
+          fk_site_code: 'site_1',
+          fk_user_code: 'user4',
           post_number: 112,
           receiver_name: '김테스트4',
           receiver_address: '서울특별시 테스트구 테스트동',
