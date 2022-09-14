@@ -15,7 +15,7 @@ export class RefundService {
   async create(
     order_productCode: string,
     createRefundDto: CreateRefundDto
-  ): Promise<boolean> {
+  ): Promise<object> {
     const [con, code] = await Promise.all([
       this.databaseService.getConnection(),
       this.databaseService.genCode(),
@@ -46,7 +46,7 @@ export class RefundService {
           INSERT INTO refund_order_product(code, fk_order_product_code, fk_refund_code) VALUES('${refundOrderProductCode}', '${order_productCode}','${code}')
       `);
       await con.commit();
-      return true;
+      return { success: true, code };
     } catch (error) {
       con.release();
       throw error;
@@ -67,8 +67,8 @@ export class RefundService {
     code: string,
     site_code: string
   ): Promise<GetRefundDto[]> {
-    console.log(code);
     const con = await this.databaseService.getConnection();
+
     if (!con) {
       throw new Error();
     }
@@ -79,14 +79,12 @@ export class RefundService {
       const cursorIdx = row[0].idx;
       const [refundData] = await con.query(`
       SELECT
-        *
+        idx, code, amount, reason_type, reason_detail, DATE_FORMAT(updated_time,'%Y/%m/%d'),  DATE_FORMAT(created_time,'%Y/%m/%d'), fk_order_code, fk_site_code
         FROM refunds
         WHERE
         idx >= '${cursorIdx}' AND fk_site_code='${site_code}'
         LIMIT ${perPage};
         `);
-      console.log(refundData);
-      console.log(refundData[0]);
       const refunds: GetRefundDto[] = [];
       for (const i in refundData) {
         refunds.push(refundData[i]);
@@ -179,7 +177,7 @@ export class RefundService {
   async findOne(code: string): Promise<GetRefundDto> {
     try {
       const refundData = await this.databaseService.query(`
-      SELECT * FROM refunds WHERE code='${code}'
+      SELECT idx, code, amount, reason_type, reason_detail, DATE_FORMAT(updated_time,'%Y/%m/%d') as updated_time,  DATE_FORMAT(created_time,'%Y/%m/%d') as created_time, fk_order_code, fk_site_code FROM refunds WHERE code='${code}'
       `);
       const refunds: GetRefundDto = refundData[0];
       return refunds;

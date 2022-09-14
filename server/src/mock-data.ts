@@ -1,5 +1,6 @@
 import { GetMembershipDto } from './membership/dto/get-membership.dto';
 import { GetUserDto } from './user/dto/get-user.dto';
+import { GetRefundDto } from './refund/dto/get-refund.dto';
 
 export const UserMockData: GetUserDto[] = [
   {
@@ -112,5 +113,44 @@ export const Orders: object[] = [
     receiver_phone2: '01077776666',
     status: '주문완료',
     total_price: 10222,
+  },
+];
+
+export const RefundMockData: GetRefundDto[] = [
+  {
+    idx: 1,
+    code: `test_code1`,
+    amount: 100,
+    reason_type: `test_reason_type1`,
+    reason_detail: `test_reason_detail1`,
+    fk_order_code: `teat_order_code1`,
+    fk_site_code: `test_site_code1`,
+  },
+  {
+    idx: 2,
+    code: `test_code2`,
+    amount: 100,
+    reason_type: `test_reason_type2`,
+    reason_detail: `test_reason_detail2`,
+    fk_order_code: `teat_order_code2`,
+    fk_site_code: `test_site_code2`,
+  },
+  {
+    idx: 3,
+    code: `test_code3`,
+    amount: 100,
+    reason_type: `test_reason_type3`,
+    reason_detail: `test_reason_detail3`,
+    fk_order_code: `teat_order_code3`,
+    fk_site_code: `test_site_code3`,
+  },
+  {
+    idx: 4,
+    code: `test_code4`,
+    amount: 100,
+    reason_type: `test_reason_type4`,
+    reason_detail: `test_reason_detail4`,
+    fk_order_code: `teat_order_code4`,
+    fk_site_code: `test_site_code4`,
   },
 ];
