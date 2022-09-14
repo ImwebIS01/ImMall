@@ -16,6 +16,7 @@ import * as Joi from 'joi';
 import { MessageProducerService } from './message.producer.service';
 import { MessageConsumer } from './message.consumer';
 import * as redisStore from 'cache-manager-ioredis';
+import { MasterDatabaseService } from './database/master.database.service';
 
 const ENV = process.env.NODE_ENV;
 Logger.debug(ENV);
@@ -60,6 +61,11 @@ Logger.debug(ENV);
     UsefulModule,
   ],
   controllers: [AppController],
-  providers: [AppService, MessageProducerService, MessageConsumer],
+  providers: [
+    AppService,
+    MessageProducerService,
+    MessageConsumer,
+    MasterDatabaseService,
+  ],
 })
 export class AppModule {}

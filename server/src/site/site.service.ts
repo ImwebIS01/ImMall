@@ -1,7 +1,11 @@
+import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
+import { Queue } from 'bull';
 import { RowDataPacket, OkPacket, ResultSetHeader } from 'mysql2';
 import { PoolConnection } from 'mysql2/promise';
 import { DatabaseService } from 'src/database/database.service';
+import { MasterDatabaseService } from 'src/database/master.database.service';
+import { SlaveDatabaseService } from 'src/database/slave.database.service';
 
 import { CreateSiteDto } from './dto/create-site.dto';
 import { GetSiteDto } from './dto/get-site.dto';
@@ -9,28 +13,33 @@ import { UpdateSiteDto } from './dto/update-site.dto';
 
 @Injectable()
 export class SiteService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly masterDatabaseService: MasterDatabaseService,
+    private readonly slaveDatabaseService: SlaveDatabaseService,
+    @InjectQueue('message-queue') private readonly queue: Queue
+  ) {}
+
+  /** 사이트 등록 */
   async create(createSiteDto: CreateSiteDto): Promise<boolean> {
     try {
-      const [con, code] = await Promise.all([
-        this.databaseService.getConnection(),
-        this.databaseService.genCode(),
-      ]);
-      await con.query(`
+      const code: string = await this.slaveDatabaseService.genCode();
+      const sql = `
       INSERT INTO sites
       (code, name)
       VALUES ("${code}","${createSiteDto.name}");
-      `);
-      con.release();
+      `;
+      await this.queue.add('send-query', sql);
       return true;
     } catch (error) {
       throw error;
     }
   }
 
+  /** 사이트 전체 조회 */
   async findAll(): Promise<GetSiteDto[]> {
     try {
-      const con = await this.databaseService.getConnection();
+      const con = await this.slaveDatabaseService.getConnection();
       const sitesRowData:
         | RowDataPacket[]
         | RowDataPacket[][]
