@@ -11,7 +11,7 @@ import { SiteService } from './site.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
 
-@Controller('site')
+@Controller('sites')
 export class SiteController {
   constructor(private readonly siteService: SiteService) {}
 

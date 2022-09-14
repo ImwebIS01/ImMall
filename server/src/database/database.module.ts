@@ -7,6 +7,4 @@ import { DatabaseService } from './database.service';
   providers: [DatabaseService, ConfigService],
   exports: [DatabaseModule],
 })
-export class DatabaseModule {
-  constructor(private readonly databaseService: DatabaseService) {}
-}
+export class DatabaseModule {}
