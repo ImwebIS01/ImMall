@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { query } from 'express';
 import { RowDataPacket, OkPacket, ResultSetHeader } from 'mysql2';
 import { PoolConnection } from 'mysql2/promise';
 import { DatabaseService } from 'src/database/database.service';
+
 import { CreateSiteDto } from './dto/create-site.dto';
 import { GetSiteDto } from './dto/get-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
@@ -17,10 +17,11 @@ export class SiteService {
         this.databaseService.genCode(),
       ]);
       await con.query(`
-      INSERT INTO site
+      INSERT INTO sites
       (code, name)
       VALUES ("${code}","${createSiteDto.name}");
       `);
+      con.release();
       return true;
     } catch (error) {
       throw error;
@@ -38,13 +39,14 @@ export class SiteService {
         | ResultSetHeader = (
         await con.query(`
       SELECT idx, code, name, created_time, updated_time 
-      FROM site;
+      FROM sites;
       `)
       )[0];
       const sites: GetSiteDto[] = [];
-      for (let i in sitesRowData) {
+      for (const i in sitesRowData) {
         sites.push(sitesRowData[i]);
       }
+      con.release();
       return sites;
     } catch (error) {
       throw error;
@@ -62,10 +64,11 @@ export class SiteService {
         | ResultSetHeader = (
         await con.query(`
       SELECT idx, code, name, created_time, updated_time 
-      FROM site 
+      FROM sites 
       WHERE code="${code}";
       `)
       )[0];
+      con.release();
       return site[0];
     } catch (error) {
       throw error;
@@ -76,10 +79,11 @@ export class SiteService {
     try {
       const con: PoolConnection = await this.databaseService.getConnection();
       const existingData = await con.query(`
-      UPDATE site
+      UPDATE sites
       SET name="${updateSiteDto.name}"x
       WHERE code="${code}";
       `);
+      con.release();
       return true;
     } catch (error) {
       throw error;
@@ -91,9 +95,10 @@ export class SiteService {
       const con: PoolConnection = await this.databaseService.getConnection();
 
       await con.query(`
-          DELETE from site
+          DELETE from sites
           WHERE code="${code}"
           `);
+      con.release();
       return true;
     } catch (error) {
       throw error;
