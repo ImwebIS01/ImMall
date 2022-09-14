@@ -1,29 +1,24 @@
 import { InjectQueue, Process, Processor } from '@nestjs/bull';
 import { Job, Queue } from 'bull';
+import { MasterDatabaseService } from './database/master.database.service';
 
 @Processor('message-queue')
 export class MessageConsumer {
-  constructor(@InjectQueue('message-queue') private queue: Queue) {}
-  @Process('message-job')
-  readOperationJob(job: Job<unknown>) {
-    console.log(job);
-  }
-
-  @Process('count')
-  async countJob() {
-    console.log(await this.queue.count());
-  }
-
-  @Process('failed')
-  async getFailedJobDatas() {
-    const failedJob: Job[] = await this.queue.getFailed();
-    failedJob.map((job) => {
-      console.log(job.data);
-    });
-  }
-
-  @Process('completed')
-  async getCompletedJobDatas(): Promise<Job[]> {
-    return this.queue.getCompleted();
+  constructor(
+    @InjectQueue('message-queue') private queue: Queue,
+    private readonly masterDatabaseService: MasterDatabaseService
+  ) {}
+  @Process('send-query')
+  async readOperationJob(job: Job<string>) {
+    const con = await this.masterDatabaseService.getConnection();
+    try {
+      const sql: string = job.data;
+      await con.query(sql);
+      console.log('Success to send query \n', sql);
+    } catch (error) {
+      throw error;
+    } finally {
+      con.release();
+    }
   }
 }
