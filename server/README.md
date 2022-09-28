@@ -1,73 +1,60 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## 💻 프로젝트 주제
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+- 대용량 트래픽, 데이터를 고려한 커머스 플랫폼 설계 + 주문, 포인트 적립/사용, 부분 환불 처리 로직 고도화
+    
+    ![스크린샷 2022-09-23 오후 4.46.53.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/04165968-b7fc-46e7-8477-6ff5c3ec71f3/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.46.53.png)
+    
+    ![스크린샷 2022-09-23 오후 4.58.46.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/6ecf6d42-7365-4579-a678-d26e2db0fddc/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.58.46.png)
+    
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🛠 기술 스택
 
-## Description
+![스크린샷 2022-09-23 오후 4.47.40.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/17580f19-015f-42b4-8d13-b5124194b477/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.47.40.png)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 💡 주요 내용
 
-## Installation
+### 적립금 부분 환불 기능 고도화 → 이슈 개선 방안 제시
 
-```bash
-$ npm install
-```
+- 아임웹 프로덕션 내 고객이 부분 환불 요청 시 적립금을 부분 반환 처리에 이슈 발견
+- 데이터베이스 설계에 문제를 발견하고 해당 부분을 다대다 매핑 테이블 활용하여 재설계 및 트랜젝션 처리
+    
+    ![스크린샷 2022-09-23 오후 4.47.56.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d6d97084-7d93-4387-af0d-87635c1615e4/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.47.56.png)
+    
+    ![스크린샷 2022-09-23 오후 5.00.31.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c7943071-4d70-4a62-b4b5-0d2b3fdb53ba/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.00.31.png)
+    
 
-## Running the app
+### 데이터베이스 커넥션 제어 → 리소스 활용 효율 향상
 
-```bash
-# development
-$ npm run start
+- ORM 사용 시 발생하는 단점(쿼리 제어, 성능 저하 등)mysql 드라이버를 활용
+- 커넥션 풀 사용, 커넥션 개수를 제한하여 리소스 고갈 방지
+    
+    ![스크린샷 2022-09-23 오후 4.48.30.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/10ef4f01-6a47-4385-bb39-207bc86c4dab/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.48.30.png)
+    
+    ![스크린샷 2022-09-23 오후 5.00.59.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8f073472-ebd4-4ae5-9b28-6ae2a9873d48/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.00.59.png)
+    
 
-# watch mode
-$ npm run start:dev
+### 데이터베이스 이중화(읽기&쓰기 전용 분리) → DB 접근 부하 분산
 
-# production mode
-$ npm run start:prod
-```
+- Master & Slave 구조를 사용, 쓰기 전용 DB(Master)와 읽기 전용 DB(Slave)를 별도로 두고, 용도에 맞게 사용함으로써 DB 접근 부하를 분산
+    
+    ![스크린샷 2022-09-23 오후 4.48.49.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4e447cf8-e60c-4f89-bfbf-c7eb01629bfd/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.48.49.png)
+    
 
-## Test
+### 레디스 Bull Queue → DB 접근 병목 방지
 
-```bash
-# unit tests
-$ npm run test
+- Redis 위에 npm Bull로 메세지 큐를 구현하고, 주문 로직을 비동기 프로세스 처리
+- DB에 동시 트래픽이 몰리지 않도록 대기열로 DB접근 쿼리를 제어
+    
+    ![스크린샷 2022-09-23 오후 4.49.23.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ff87f131-fd5b-4187-8679-bd89c478b632/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.49.23.png)
+    
+    ![스크린샷 2022-09-23 오후 4.49.06.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a2aebab6-51b2-4b86-8e07-a94304898a8b/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.49.06.png)
+    
 
-# e2e tests
-$ npm run test:e2e
+### 테스트 코드 작성
 
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+- jest를 이용하여 서비스, 컨트롤러 메서드 유닛 테스트 진행
+- mock 함수 및 mock data 활용을 통해 테스트 로직의 의존성 분리
+    
+    ![스크린샷 2022-09-23 오후 4.50.28.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/732d2789-5f2f-4371-a63a-af7e5663ae82/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.50.28.png)
+    
+    ![스크린샷 2022-09-23 오후 4.50.41.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/afd63b12-9d9e-4296-a275-9f81586f6feb/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2022-09-23_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.50.41.png)
