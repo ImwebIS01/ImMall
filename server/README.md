@@ -25,7 +25,6 @@
 
 - ORM 사용 시 발생하는 단점(쿼리 제어, 성능 저하 등)mysql 드라이버를 활용
 - 커넥션 풀 사용, 커넥션 개수를 제한하여 리소스 고갈 방지
-
 ![image](https://user-images.githubusercontent.com/68934467/192754593-587d17c7-7c7b-410b-8c6b-f7471e2998d9.png)
 ![image](https://user-images.githubusercontent.com/68934467/192754616-57e0bfc6-fb28-4efb-9e9b-cf117dc6dca4.png)
 
@@ -51,4 +50,7 @@
 
 - jest를 이용하여 서비스, 컨트롤러 메서드 유닛 테스트 진행
 - mock 함수 및 mock data 활용을 통해 테스트 로직의 의존성 분리
+![image](https://user-images.githubusercontent.com/68934467/192754929-dad165a3-0594-4d24-987e-3d11d009fc6f.png)
+![image](https://user-images.githubusercontent.com/68934467/192754996-14db694c-fed3-4294-ada6-418ec3b5f054.png)
+
 
