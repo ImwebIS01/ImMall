@@ -20,10 +20,11 @@ export class RefundController {
   @Post(':site_code')
   async create(
     @Param('site_code') site_code: string,
+    @Query('order_productCode') order_productCode: string,
     @Body() createRefundDto: CreateRefundDto
   ) {
     createRefundDto.fk_site_code = site_code;
-    return this.refundService.create(createRefundDto);
+    return this.refundService.create(order_productCode, createRefundDto);
   }
 
   @Get(':site_code')
@@ -38,6 +39,16 @@ export class RefundController {
   @Get('code/:code')
   async findOne(@Param('code') code: string) {
     return this.refundService.findOne(code);
+  }
+
+  @Get('orderInfo/:code')
+  async findOrderInfo(@Param('code') code: string) {
+    return this.refundService.findOrderInfo(code);
+  }
+
+  @Get('productInfo/:code')
+  async findProductInfo(@Param('code') code: string) {
+    return this.refundService.findProductInfo(code);
   }
 
   @Patch(':code')

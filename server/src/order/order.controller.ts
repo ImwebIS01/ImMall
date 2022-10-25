@@ -16,12 +16,15 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @Post('/')
+  @Post(':site_code')
   create(
+    @Param('site_code') site_code: string,
     @Query('productCode') productCode: string,
+    @Query('count') count: number,
     @Body() createOrderDto: CreateOrderDto
   ) {
-    return this.orderService.create(productCode, createOrderDto);
+    createOrderDto.fk_site_code = site_code;
+    return this.orderService.create(productCode, count, createOrderDto);
   }
   @Get('/')
   findAll() {

@@ -4,12 +4,14 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GetOrderDto } from './dto/get-order.dto';
+import { MessageProducerService } from 'src/message.producer.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly usefulService: UsefulService,
-    private readonly databaseService: DatabaseService
+    private readonly databaseService: DatabaseService,
+    private readonly messageProducerService: MessageProducerService
   ) {}
 
   /**
@@ -19,6 +21,7 @@ export class OrderService {
    */
   async create(
     productCode: string,
+    count: number,
     createOrderDto: CreateOrderDto
   ): Promise<boolean> {
     const con = await this.databaseService.getConnection();
@@ -34,8 +37,8 @@ export class OrderService {
       INSERT INTO orders(
         code,
         order_no,
-        site_code,
-        user_code,
+        fk_site_code,
+        fk_user_code,
         post_number,
         receiver_name,
         receiver_address,
@@ -45,8 +48,8 @@ export class OrderService {
         total_price)
         VALUES('${ordersCode}',
         '${createOrderDto.order_no}',
-        '${createOrderDto.site_code}',
-        '${createOrderDto.user_code}',
+        '${createOrderDto.fk_site_code}',
+        '${createOrderDto.fk_user_code}',
         '${createOrderDto.post_number}',
         '${createOrderDto.receiver_name}',
         '${createOrderDto.receiver_address}',
@@ -56,17 +59,23 @@ export class OrderService {
         '${createOrderDto.total_price}')
         `);
 
-      const orderProductCode = await this.databaseService.genCode();
-      //oder_product 다대다 연결 데이터 삽입
-      await con.query(
-        `INSERT INTO order_product(code,fk_order_code,fk_product_code) VALUES('${orderProductCode}','${ordersCode}','${productCode}')`
-      );
+      //oder_product 다대다 연결 데이터 count만큼 삽입
+      for (let i = 0; i < count; i++) {
+        const orderProductCode = await this.databaseService.genCode();
+        await con.query(`
+        INSERT INTO order_product(code,fk_order_code,fk_product_code) VALUES('${orderProductCode}','${ordersCode}','${productCode}')
+      `);
+      }
+      //해당 상품 재고 변경
+      await con.query(`
+      UPDATE products SET stock = stock - ${count} WHERE code = '${productCode}'
+      `);
+      //포인트 적립
       const pointCode = await this.databaseService.genCode();
       const point = this.usefulService.saveUpPoint(createOrderDto.total_price);
-      //포인트 적립
       await con.query(
         `INSERT INTO points(code,fk_user_code,point,expire_date) VALUES('${pointCode}','${
-          createOrderDto.user_code
+          createOrderDto.fk_user_code
         }','${point}','${this.usefulService.expireDatePoint()}')`
       );
       const pointAppliedCode = await this.databaseService.genCode();
@@ -77,6 +86,10 @@ export class OrderService {
 
       //커밋
       await con.commit();
+      // 메세지 큐에 적재할 트랜지션 쿼리
+      // const sendJob = await this.messageProducerService.sendMessage(
+      //   `START TRANSACTION; INSERT INTO orders(code,order_no,site_code,user_code,post_number,receiver_name,receiver_address,receiver_phone,receiver_phone2,status,total_price) VALUES('${ordersCode}','${createOrderDto.order_no}','${createOrderDto.site_code}','${createOrderDto.user_code}','${createOrderDto.post_number}','${createOrderDto.receiver_name}','${createOrderDto.receiver_address}','${createOrderDto.receiver_phone}','${createOrderDto.receiver_phone2}','${createOrderDto.status}','${createOrderDto.total_price}'); INSERT INTO order_product(code,fk_order_code,fk_product_code) VALUES('${orderProductCode}','${ordersCode}','${productCode}');  COMMIT;`
+      // );
       return true;
     } catch (error) {
       //에러 발생시 롤백
